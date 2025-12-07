@@ -13,3 +13,10 @@ class CategorySchema(BaseSchema):
 
     name: str = Field(..., min_length=1, max_length=100, description="Category name (required, unique)")
     products: Optional[List['ProductSchema']] = []
+
+
+class CategorySchemaWithoutProducts(BaseSchema):
+    """Schema for Category entity without the 'products' field to avoid circular references."""
+
+    name: str = Field(..., min_length=1, max_length=100,
+                      description="Category name (required, unique)")
