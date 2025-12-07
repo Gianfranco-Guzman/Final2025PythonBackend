@@ -5,14 +5,15 @@ from pydantic import Field
 from schemas.base_schema import BaseSchema
 
 if TYPE_CHECKING:
-    from schemas.product_schema import ProductSchema
+    from schemas.product_schema import ProductSchemaWithoutRelations
 
 
 class CategorySchema(BaseSchema):
     """Schema for Category entity with validations."""
 
     name: str = Field(..., min_length=1, max_length=100, description="Category name (required, unique)")
-    products: Optional[List['ProductSchema']] = []
+    products: Optional[List['ProductSchemaWithoutRelations']
+                       ] = Field(default_factory=list)
 
 
 class CategorySchemaWithoutProducts(BaseSchema):
