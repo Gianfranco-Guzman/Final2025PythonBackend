@@ -15,9 +15,7 @@ ReviewSchema.model_rebuild()
 BillSchema.model_rebuild()
 
 ProductSchema.model_rebuild(_types_namespace={
-    "CategorySchemaWithoutProducts": CategorySchemaWithoutProducts,
-    "ReviewSchema": ReviewSchema,
-    "OrderDetailSchema": OrderDetailSchema
+    "CategorySchemaWithoutProducts": CategorySchemaWithoutProducts
 })
 CategorySchema.model_rebuild(_types_namespace={
     "ProductSchemaWithoutRelations": ProductSchemaWithoutRelations
