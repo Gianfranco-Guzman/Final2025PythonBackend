@@ -186,5 +186,6 @@ _Opcional: Dejar una reseña del producto._
 
 ## 💾 Persistencia de Datos
 
-- Si detienes el servidor con `Ctrl + C` o `docker compose stop`, **los datos se guardan**. Al volver a iniciarlo, tus productos y clientes seguirán ahí.
-- Si usas `docker compose down -v`, **se borra todo**.
+- **Tus datos están seguros:** El proyecto usa un "Volumen de Docker" (`postgres_data_dev`) que actúa como un disco duro virtual.
+- **Al detener (`Ctrl + C`):** El servidor se apaga, pero los datos quedan guardados en el volumen. Al volver a iniciar (`docker compose up`), todo estará ahí.
+- **Para borrar todo:** Debes ejecutar explícitamente `docker compose down -v` (la `-v` elimina el volumen).
