@@ -4,10 +4,12 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from models.product import ProductModel
+from repositories.category_repository import CategoryRepository
 from repositories.product_repository import ProductRepository
 from schemas.product_schema import ProductSchema
 from services.base_service_impl import BaseServiceImpl
 from services.cache_service import cache_service
+from repositories.base_repository_impl import InstanceNotFoundError
 from utils.logging_utils import get_sanitized_logger
 
 logger = get_sanitized_logger(__name__)  # P11: Sanitized logging
@@ -23,6 +25,7 @@ class ProductService(BaseServiceImpl):
             schema=ProductSchema,
             db=db
         )
+        self.category_repository = CategoryRepository(db)
         self.cache = cache_service
         self.cache_prefix = "products"
 
@@ -86,6 +89,15 @@ class ProductService(BaseServiceImpl):
         """
         Create new product and invalidate list cache
         """
+        # Validate category exists
+        try:
+            self.category_repository.find(schema.category_id)
+        except InstanceNotFoundError:
+            logger.warning(
+                f"Attempted to create product with non-existent category ID: {schema.category_id}")
+            raise InstanceNotFoundError(
+                f"Category with id {schema.category_id} not found.")
+
         product = super().save(schema)
 
         # Invalidate list cache (all paginated lists)
