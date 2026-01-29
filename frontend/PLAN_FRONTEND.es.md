@@ -62,6 +62,7 @@ Agrupados por recurso (CRUD con paginación):
 
 ---
 
+ codex/review-backend-project-for-frontend-development
 ## 4.1) Estructura creada en `frontend/`
 
 - **Vite + React + TypeScript** como base.
@@ -92,6 +93,8 @@ VITE_API_URL=http://localhost:8000
 Si usas otra URL (Render), solo reemplaza ese valor. También puedes copiar `frontend/.env.example` a `frontend/.env`.
 
 ---
+
+
 
 ## 5) Sugerencia de commits para el frontend
 
