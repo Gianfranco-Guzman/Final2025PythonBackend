@@ -62,6 +62,40 @@ Agrupados por recurso (CRUD con paginación):
 
 ---
 
+ codex/review-backend-project-for-frontend-development
+## 4.1) Estructura creada en `frontend/`
+
+- **Vite + React + TypeScript** como base.
+- **`.env`** con `VITE_API_URL` para apuntar al backend.
+- **Cliente API** en `src/api/client.ts` consumiendo endpoints existentes:
+  - `GET /health_check`
+  - `GET /categories`
+  - `GET /products`
+
+> Si faltan endpoints o tipos, todo debe quedar parametrizado y documentado aquí.
+
+### Comandos rápidos
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Variables de entorno
+
+Archivo: `frontend/.env`
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+Si usas otra URL (Render), solo reemplaza ese valor. También puedes copiar `frontend/.env.example` a `frontend/.env`.
+
+---
+
+
+
 ## 5) Sugerencia de commits para el frontend
 
 > **Ejemplo de orden y título** (ajusta según avances):
