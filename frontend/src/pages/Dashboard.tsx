@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { ApiCategory, ApiHealthCheck, ApiProduct } from "../api/types";
+import { categoriesService } from "../services/categories.service";
+import { productsService } from "../services/products.service";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("es-AR", {
@@ -22,8 +24,8 @@ export default function Dashboard() {
         const [healthResponse, categoryResponse, productResponse] =
           await Promise.all([
             api.getHealthCheck(),
-            api.getCategories(),
-            api.getProducts()
+            categoriesService.getAll(),
+            productsService.getAll()
           ]);
         setHealth(healthResponse);
         setCategories(categoryResponse);
