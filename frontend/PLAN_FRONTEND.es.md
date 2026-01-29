@@ -31,15 +31,15 @@ Este documento resume **qué hace el backend**, **dónde están las guías** y *
 
 Agrupados por recurso (CRUD con paginación):
 
-- **Categorías**: `/categories`
-- **Productos**: `/products`
-- **Clientes**: `/clients`
-- **Direcciones**: `/addresses`
-- **Facturas**: `/bills`
-- **Pedidos**: `/orders`
-- **Detalles de pedido**: `/order_details`
-- **Reseñas**: `/reviews`
-- **Health check**: `/health_check`
+- **Categorías**: `/categories/` + `/categories/{id_key}/`
+- **Productos**: `/products/`
+- **Clientes**: `/clients/`
+- **Direcciones**: `/addresses/`
+- **Facturas**: `/bills/`
+- **Pedidos**: `/orders/`
+- **Detalles de pedido**: `/order_details/`
+- **Reseñas**: `/reviews/`
+- **Health check**: `/health_check/`
 
 > Para evitar errores al poblar datos, usa el **orden de creación** sugerido en `frontend/BACKEND_GUIDE.md` (categorías → productos → clientes → direcciones → facturas → pedidos → detalles → reseñas).
 
@@ -68,9 +68,18 @@ Agrupados por recurso (CRUD con paginación):
 - **Vite + React + TypeScript** como base.
 - **`.env`** con `VITE_API_URL` para apuntar al backend.
 - **Cliente API** en `src/api/client.ts` consumiendo endpoints existentes:
-  - `GET /health_check`
-  - `GET /categories`
-  - `GET /products`
+  - `GET /health_check/`
+- **Servicios** en `src/services/` para consumir endpoints:
+  - `GET /categories/`
+  - `GET /categories/{id_key}/`
+  - `POST /categories/`
+  - `PUT /categories/{id_key}/`
+  - `DELETE /categories/{id_key}/`
+  - `GET /products/`
+- **Rutas del frontend**:
+  - `/dashboard`
+  - `/categories`
+  - `/products`
 
 > Si faltan endpoints o tipos, todo debe quedar parametrizado y documentado aquí.
 
