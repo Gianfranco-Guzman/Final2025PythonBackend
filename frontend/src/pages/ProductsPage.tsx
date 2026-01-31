@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import { api } from "../api/client";
 import { ApiProduct } from "../api/types";
-import { productsService } from "../services/products.service";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("es-AR", {
@@ -18,7 +18,7 @@ export default function ProductsPage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await productsService.getAll();
+        const data = await api.getProducts();
         setProducts(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido");

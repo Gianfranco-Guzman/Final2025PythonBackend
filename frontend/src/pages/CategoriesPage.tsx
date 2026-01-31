@@ -1,10 +1,10 @@
 import { FormEvent, useEffect, useState } from "react";
+import { api, CategoryPayload } from "../api/client";
 import { ApiCategory } from "../api/types";
-import { categoriesService } from "../services/categories.service";
 
 type CategoryFormState = {
   id_key?: number;
-  name: string;
+  name: CategoryPayload["name"];
 };
 
 const emptyForm: CategoryFormState = {
@@ -22,7 +22,7 @@ export default function CategoriesPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await categoriesService.getAll();
+      const data = await api.getCategories();
       setCategories(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
@@ -47,11 +47,11 @@ export default function CategoriesPage() {
     setError(null);
     try {
       if (formState.id_key) {
-        await categoriesService.update(formState.id_key, {
+        await api.updateCategory(formState.id_key, {
           name: trimmedName
         });
       } else {
-        await categoriesService.create({ name: trimmedName });
+        await api.createCategory({ name: trimmedName });
       }
       setFormState(emptyForm);
       await loadCategories();
@@ -66,7 +66,7 @@ export default function CategoriesPage() {
     setFormLoading(true);
     setError(null);
     try {
-      const category = await categoriesService.getOne(idKey);
+      const category = await api.getCategory(idKey);
       setFormState({
         id_key: category.id_key,
         name: category.name
@@ -89,7 +89,7 @@ export default function CategoriesPage() {
     setFormLoading(true);
     setError(null);
     try {
-      await categoriesService.remove(idKey);
+      await api.deleteCategory(idKey);
       await loadCategories();
       if (formState.id_key === idKey) {
         setFormState(emptyForm);
