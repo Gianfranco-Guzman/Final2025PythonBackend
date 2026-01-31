@@ -41,3 +41,28 @@ export type ApiOrderDetail = {
   order_id: number;
   product_id: number;
 };
+
+export type ApiBill = {
+  id_key: number;
+  bill_number: string;
+  discount: number | null;
+  date: string;
+  total: number;
+  payment_type: number;
+  client_id: number;
+};
+
+export type ApiAddress = {
+  id_key: number;
+  street: string | null;
+  number: string | null;
+  city: string | null;
+  client_id: number;
+};
+
+export type ApiReview = {
+  id_key: number;
+  rating: number;
+  comment: string | null;
+  product_id: number;
+};
