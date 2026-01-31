@@ -1,5 +1,12 @@
 import { requestEmpty, requestJson } from "../services/http";
-import { ApiCategory, ApiClient, ApiHealthCheck, ApiProduct } from "./types";
+import {
+  ApiCategory,
+  ApiClient,
+  ApiHealthCheck,
+  ApiOrder,
+  ApiOrderDetail,
+  ApiProduct
+} from "./types";
 
 export type CategoryPayload = {
   name: string;
@@ -17,6 +24,22 @@ export type ClientPayload = {
   lastname: string;
   email: string;
   telephone?: string | null;
+};
+
+export type OrderPayload = {
+  date: string;
+  total: number;
+  delivery_method: number;
+  status: number;
+  client_id: number;
+  bill_id: number;
+};
+
+export type OrderDetailPayload = {
+  quantity: number;
+  price?: number | null;
+  order_id: number;
+  product_id: number;
 };
 
 export const api = {
@@ -87,6 +110,51 @@ export const api = {
     }),
   deleteClient: (idKey: number) =>
     requestEmpty(`/clients/${idKey}/`, {
+      method: "DELETE"
+    }),
+  getOrders: () => requestJson<ApiOrder[]>("/orders/"),
+  getOrder: (idKey: number) => requestJson<ApiOrder>(`/orders/${idKey}/`),
+  createOrder: (payload: OrderPayload) =>
+    requestJson<ApiOrder>("/orders/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  updateOrder: (idKey: number, payload: OrderPayload) =>
+    requestJson<ApiOrder>(`/orders/${idKey}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  deleteOrder: (idKey: number) =>
+    requestEmpty(`/orders/${idKey}/`, {
+      method: "DELETE"
+    }),
+  getOrderDetails: () => requestJson<ApiOrderDetail[]>("/order_details/"),
+  getOrderDetail: (idKey: number) =>
+    requestJson<ApiOrderDetail>(`/order_details/${idKey}/`),
+  createOrderDetail: (payload: OrderDetailPayload) =>
+    requestJson<ApiOrderDetail>("/order_details/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  updateOrderDetail: (idKey: number, payload: OrderDetailPayload) =>
+    requestJson<ApiOrderDetail>(`/order_details/${idKey}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  deleteOrderDetail: (idKey: number) =>
+    requestEmpty(`/order_details/${idKey}/`, {
       method: "DELETE"
     })
 };
