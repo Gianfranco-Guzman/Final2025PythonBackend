@@ -1,11 +1,14 @@
 import { requestEmpty, requestJson } from "../services/http";
 import {
+  ApiAddress,
+  ApiBill,
   ApiCategory,
   ApiClient,
   ApiHealthCheck,
   ApiOrder,
   ApiOrderDetail,
-  ApiProduct
+  ApiProduct,
+  ApiReview
 } from "./types";
 
 export type CategoryPayload = {
@@ -39,6 +42,28 @@ export type OrderDetailPayload = {
   quantity: number;
   price?: number | null;
   order_id: number;
+  product_id: number;
+};
+
+export type BillPayload = {
+  bill_number: string;
+  discount?: number | null;
+  date: string;
+  total: number;
+  payment_type: number;
+  client_id: number;
+};
+
+export type AddressPayload = {
+  street?: string | null;
+  number?: string | null;
+  city?: string | null;
+  client_id: number;
+};
+
+export type ReviewPayload = {
+  rating: number;
+  comment?: string | null;
   product_id: number;
 };
 
@@ -155,6 +180,73 @@ export const api = {
     }),
   deleteOrderDetail: (idKey: number) =>
     requestEmpty(`/order_details/${idKey}/`, {
+      method: "DELETE"
+    }),
+  getBills: () => requestJson<ApiBill[]>("/bills/"),
+  getBill: (idKey: number) => requestJson<ApiBill>(`/bills/${idKey}/`),
+  createBill: (payload: BillPayload) =>
+    requestJson<ApiBill>("/bills/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  updateBill: (idKey: number, payload: BillPayload) =>
+    requestJson<ApiBill>(`/bills/${idKey}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  deleteBill: (idKey: number) =>
+    requestEmpty(`/bills/${idKey}/`, {
+      method: "DELETE"
+    }),
+  getAddresses: () => requestJson<ApiAddress[]>("/addresses/"),
+  getAddress: (idKey: number) =>
+    requestJson<ApiAddress>(`/addresses/${idKey}/`),
+  createAddress: (payload: AddressPayload) =>
+    requestJson<ApiAddress>("/addresses/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  updateAddress: (idKey: number, payload: AddressPayload) =>
+    requestJson<ApiAddress>(`/addresses/${idKey}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  deleteAddress: (idKey: number) =>
+    requestEmpty(`/addresses/${idKey}/`, {
+      method: "DELETE"
+    }),
+  getReviews: () => requestJson<ApiReview[]>("/reviews/"),
+  getReview: (idKey: number) => requestJson<ApiReview>(`/reviews/${idKey}/`),
+  createReview: (payload: ReviewPayload) =>
+    requestJson<ApiReview>("/reviews/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  updateReview: (idKey: number, payload: ReviewPayload) =>
+    requestJson<ApiReview>(`/reviews/${idKey}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  deleteReview: (idKey: number) =>
+    requestEmpty(`/reviews/${idKey}/`, {
       method: "DELETE"
     })
 };
