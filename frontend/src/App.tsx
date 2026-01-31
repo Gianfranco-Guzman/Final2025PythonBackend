@@ -2,6 +2,8 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import CategoriesPage from "./pages/CategoriesPage";
 import ClientsPage from "./pages/ClientsPage";
 import Dashboard from "./pages/Dashboard";
+import OrderDetailsPage from "./pages/OrderDetailsPage";
+import OrdersPage from "./pages/OrdersPage";
 import ProductsPage from "./pages/ProductsPage";
 
 export default function App() {
@@ -37,6 +39,18 @@ export default function App() {
           >
             Clientes
           </NavLink>
+          <NavLink
+            to="/orders"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Órdenes
+          </NavLink>
+          <NavLink
+            to="/order-details"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Detalles de orden
+          </NavLink>
         </nav>
       </header>
 
@@ -47,6 +61,8 @@ export default function App() {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/clients" element={<ClientsPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/order-details" element={<OrderDetailsPage />} />
         </Routes>
       </main>
     </div>

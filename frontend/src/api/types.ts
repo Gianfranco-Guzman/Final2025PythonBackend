@@ -23,3 +23,21 @@ export type ApiClient = {
   email: string | null;
   telephone: string | null;
 };
+
+export type ApiOrder = {
+  id_key: number;
+  date: string;
+  total: number;
+  delivery_method: number;
+  status: number;
+  client_id: number;
+  bill_id: number;
+};
+
+export type ApiOrderDetail = {
+  id_key: number;
+  quantity: number;
+  price: number | null;
+  order_id: number;
+  product_id: number;
+};
