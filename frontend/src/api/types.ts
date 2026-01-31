@@ -15,3 +15,11 @@ export type ApiProduct = {
   stock: number;
   category_id: number;
 };
+
+export type ApiClient = {
+  id_key: number;
+  name: string | null;
+  lastname: string | null;
+  email: string | null;
+  telephone: string | null;
+};

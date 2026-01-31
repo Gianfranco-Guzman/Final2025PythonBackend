@@ -1,5 +1,5 @@
 import { requestEmpty, requestJson } from "../services/http";
-import { ApiCategory, ApiHealthCheck, ApiProduct } from "./types";
+import { ApiCategory, ApiClient, ApiHealthCheck, ApiProduct } from "./types";
 
 export type CategoryPayload = {
   name: string;
@@ -10,6 +10,13 @@ export type ProductPayload = {
   price: number;
   stock: number;
   category_id: number;
+};
+
+export type ClientPayload = {
+  name: string;
+  lastname: string;
+  email: string;
+  telephone?: string | null;
 };
 
 export const api = {
@@ -58,6 +65,28 @@ export const api = {
     }),
   deleteProduct: (idKey: number) =>
     requestEmpty(`/products/${idKey}/`, {
+      method: "DELETE"
+    }),
+  getClients: () => requestJson<ApiClient[]>("/clients/"),
+  getClient: (idKey: number) => requestJson<ApiClient>(`/clients/${idKey}/`),
+  createClient: (payload: ClientPayload) =>
+    requestJson<ApiClient>("/clients/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  updateClient: (idKey: number, payload: ClientPayload) =>
+    requestJson<ApiClient>(`/clients/${idKey}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }),
+  deleteClient: (idKey: number) =>
+    requestEmpty(`/clients/${idKey}/`, {
       method: "DELETE"
     })
 };
