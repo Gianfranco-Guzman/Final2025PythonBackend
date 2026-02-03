@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
-import AdminLayout from "./layouts/AdminLayout";
 import StoreLayout from "./layouts/StoreLayout";
+import AdminGate from "./components/store/AdminGate";
 import AddressesPage from "./pages/AddressesPage";
 import BillsPage from "./pages/BillsPage";
 import CategoriesPage from "./pages/CategoriesPage";
@@ -21,7 +21,7 @@ export default function App() {
         <Route path="products" element={<StoreProducts />} />
       </Route>
 
-      <Route path="/" element={<AdminLayout />}>
+      <Route path="/" element={<AdminGate />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="categories" element={<CategoriesPage />} />
