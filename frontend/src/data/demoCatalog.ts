@@ -1,18 +1,6 @@
-import placaVideoImg from "../assets/images/placa-video.jpg";
-import procesadorImg from "../assets/images/procesador.jpg";
-import auricularImg from "../assets/images/auricular.jpg";
-import mouseImg from "../assets/images/mouse.jpg";
-import tecladoImg from "../assets/images/teclado.jpg";
+import { categoryImageMap, DemoCategoryKey } from "./storeAssets";
 
-export type DemoCategoryKey = "placa de video" | "procesador" | "auricular" | "mouse" | "teclado";
-
-export const categoryImageMap: Record<DemoCategoryKey, string> = {
-  "placa de video": placaVideoImg,
-  procesador: procesadorImg,
-  auricular: auricularImg,
-  mouse: mouseImg,
-  teclado: tecladoImg
-};
+export { categoryImageMap, DemoCategoryKey };
 
 export type DemoProductSeed = {
   name: string;

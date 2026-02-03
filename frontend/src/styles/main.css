@@ -511,6 +511,10 @@ body {
   padding: 8px 16px;
   border-radius: 999px;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .store-modal-hint {
@@ -735,6 +739,11 @@ body {
   justify-content: space-between;
 }
 
+.store-product-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .store-product-body h3 {
   margin: 0 0 6px;
   font-size: 18px;
@@ -757,6 +766,100 @@ body {
 .store-stock-warning {
   color: #fbbf24;
   font-weight: 600;
+}
+
+.store-link {
+  color: #7dd3fc;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.store-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.store-detail-card {
+  display: grid;
+  gap: 24px;
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 24px;
+}
+
+.store-detail-media {
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.store-detail-media img {
+  width: 100%;
+  max-width: 320px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.store-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.store-detail-content h2 {
+  margin: 0;
+  font-size: 26px;
+  color: #f8fafc;
+}
+
+.store-detail-price {
+  margin: 0;
+  font-size: 22px;
+  color: #7dd3fc;
+  font-weight: 700;
+}
+
+.store-detail-meta {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.store-detail-meta div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #cbd5f5;
+  font-size: 13px;
+}
+
+.store-detail-meta strong {
+  font-size: 14px;
+  color: #f8fafc;
+}
+
+.store-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+@media (min-width: 900px) {
+  .store-detail-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: center;
+  }
+
+  .store-detail-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 720px) {

@@ -1,17 +1,12 @@
+import { Link } from "react-router-dom";
 import { ApiProduct } from "../../api/types";
+import { formatPrice } from "../../utils/formatters";
 
 type ProductCardProps = {
   product: ApiProduct;
   categoryName: string;
   imageSrc: string;
 };
-
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0
-  }).format(price);
 
 export default function ProductCard({
   product,
@@ -36,6 +31,11 @@ export default function ProductCard({
             ? `Últimas ${product.stock} unidades disponibles`
             : `${product.stock} unidades disponibles`}
         </p>
+        <div className="store-product-actions">
+          <Link className="store-ghost" to={`/store/products/${product.id_key}`}>
+            Ver detalle
+          </Link>
+        </div>
       </div>
     </article>
   );

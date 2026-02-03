@@ -2,39 +2,13 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { api } from "../../api/client";
 import { ApiCategory, ApiProduct } from "../../api/types";
 import ProductCard from "../../components/store/ProductCard";
-import auricularImage from "../../assets/images/auricular.jpg";
-import mouseImage from "../../assets/images/mouse.jpg";
-import placaVideoImage from "../../assets/images/placa-video.jpg";
-import procesadorImage from "../../assets/images/procesador.jpg";
-import tecladoImage from "../../assets/images/teclado.jpg";
+import { resolveCategoryImage } from "../../data/storeAssets";
 
 type FetchStatus = "idle" | "loading" | "success" | "error";
 
 type StoreFilters = {
   search: string;
   categoryId: number | null;
-};
-
-const resolveCategoryImage = (categoryName: string) => {
-  const normalized = categoryName.trim().toLowerCase();
-
-  if (normalized.includes("placa")) {
-    return placaVideoImage;
-  }
-  if (normalized.includes("proces")) {
-    return procesadorImage;
-  }
-  if (normalized.includes("auricular") || normalized.includes("head")) {
-    return auricularImage;
-  }
-  if (normalized.includes("mouse")) {
-    return mouseImage;
-  }
-  if (normalized.includes("tecl")) {
-    return tecladoImage;
-  }
-
-  return placaVideoImage;
 };
 
 export default function StoreProducts() {
