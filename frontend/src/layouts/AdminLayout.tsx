@@ -1,6 +1,14 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 export default function AdminLayout() {
+  const navigate = useNavigate();
+
+  const handleExitAdmin = () => {
+    localStorage.removeItem("demoUser");
+    localStorage.removeItem("isAdmin");
+    navigate("/store");
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -8,7 +16,8 @@ export default function AdminLayout() {
           <p className="overline">E-commerce API</p>
           <h1>Panel de administración</h1>
         </div>
-        <nav className="nav">
+        <div className="admin-actions">
+          <nav className="nav">
           <NavLink
             to="/dashboard"
             className={({ isActive }) => (isActive ? "active" : "")}
@@ -63,7 +72,11 @@ export default function AdminLayout() {
           >
             Reviews
           </NavLink>
-        </nav>
+          </nav>
+          <button type="button" className="admin-exit" onClick={handleExitAdmin}>
+            Salir de admin
+          </button>
+        </div>
       </header>
 
       <main className="app-content">
