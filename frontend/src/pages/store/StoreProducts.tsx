@@ -1,70 +1,139 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { api } from "../../api/client";
-import { ApiCategory } from "../../api/types";
-
-const demoSections = [
-  {
-    title: "Catálogo real en la próxima fase",
-    description:
-      "Aquí vivirá el grid de productos con filtros por categoría y búsqueda.",
-  },
-  {
-    title: "Layout listo para crecer",
-    description:
-      "El layout de tienda ya es independiente del admin y soporta rutas /store/*.",
-  },
-];
+import { ApiCategory, ApiProduct } from "../../api/types";
+import ProductCard from "../../components/store/ProductCard";
+import auricularImage from "../../assets/images/auricular.jpg";
+import mouseImage from "../../assets/images/mouse.jpg";
+import placaVideoImage from "../../assets/images/placa-video.jpg";
+import procesadorImage from "../../assets/images/procesador.jpg";
+import tecladoImage from "../../assets/images/teclado.jpg";
 
 type FetchStatus = "idle" | "loading" | "success" | "error";
 
+type StoreFilters = {
+  search: string;
+  categoryId: number | null;
+};
+
+const resolveCategoryImage = (categoryName: string) => {
+  const normalized = categoryName.trim().toLowerCase();
+
+  if (normalized.includes("placa")) {
+    return placaVideoImage;
+  }
+  if (normalized.includes("proces")) {
+    return procesadorImage;
+  }
+  if (normalized.includes("auricular") || normalized.includes("head")) {
+    return auricularImage;
+  }
+  if (normalized.includes("mouse")) {
+    return mouseImage;
+  }
+  if (normalized.includes("tecl")) {
+    return tecladoImage;
+  }
+
+  return placaVideoImage;
+};
+
 export default function StoreProducts() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
-  const [status, setStatus] = useState<FetchStatus>("idle");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [categoryStatus, setCategoryStatus] = useState<FetchStatus>("idle");
+  const [productStatus, setProductStatus] = useState<FetchStatus>("idle");
+  const [filters, setFilters] = useState<StoreFilters>({ search: "", categoryId: null });
 
   useEffect(() => {
     let isMounted = true;
 
-    const loadCategories = async () => {
-      setStatus("loading");
+    const loadData = async () => {
+      setCategoryStatus("loading");
+      setProductStatus("loading");
       try {
-        const response = await api.getCategories();
+        const [categoryResponse, productResponse] = await Promise.all([
+          api.getCategories(),
+          api.getProducts()
+        ]);
         if (!isMounted) {
           return;
         }
-        setCategories(response);
-        setStatus("success");
+        setCategories(categoryResponse);
+        setProducts(productResponse);
+        setCategoryStatus("success");
+        setProductStatus("success");
       } catch (error) {
         if (!isMounted) {
           return;
         }
-        setStatus("error");
+        setCategoryStatus("error");
+        setProductStatus("error");
       }
     };
 
-    loadCategories();
+    loadData();
 
     return () => {
       isMounted = false;
     };
   }, []);
 
+  const categoryLookup = useMemo(() => {
+    return new Map(categories.map((category) => [category.id_key, category]));
+  }, [categories]);
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = filters.search.trim().toLowerCase();
+
+    return products.filter((product) => {
+      if (filters.categoryId !== null && product.category_id !== filters.categoryId) {
+        return false;
+      }
+
+      if (!normalizedSearch) {
+        return true;
+      }
+
+      return product.name.toLowerCase().includes(normalizedSearch);
+    });
+  }, [filters.categoryId, filters.search, products]);
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setFilters((prev) => ({ ...prev, search: value }));
+  };
+
+  const handleCategoryChange = (categoryId: number | null) => {
+    setFilters((prev) => ({ ...prev, categoryId }));
+  };
+
   return (
     <section className="store-grid">
       <section className="store-categories">
         <div className="store-categories-header">
-          <h2>Explora por categoría</h2>
-          <p>Filtra el catálogo usando las categorías reales del backend.</p>
+          <div>
+            <h2>Explora por categoría</h2>
+            <p>Filtra el catálogo usando las categorías reales del backend.</p>
+          </div>
+          <label className="store-search">
+            <span>Búsqueda</span>
+            <input
+              type="search"
+              value={filters.search}
+              onChange={handleSearchChange}
+              placeholder="Busca un producto"
+            />
+          </label>
         </div>
-        {status === "loading" ? (
+        {categoryStatus === "loading" ? (
           <p className="store-muted">Cargando categorías...</p>
         ) : null}
-        {status === "error" ? (
+        {categoryStatus === "error" ? (
           <p className="store-muted">
             No pudimos cargar las categorías. Intenta nuevamente más tarde.
           </p>
         ) : null}
-        {status === "success" && categories.length === 0 ? (
+        {categoryStatus === "success" && categories.length === 0 ? (
           <p className="store-muted">Aún no hay categorías disponibles.</p>
         ) : null}
         {categories.length > 0 ? (
@@ -72,12 +141,12 @@ export default function StoreProducts() {
             <button
               type="button"
               className={
-                selectedCategoryId === null
+                filters.categoryId === null
                   ? "store-chip store-chip-active"
                   : "store-chip"
               }
-              onClick={() => setSelectedCategoryId(null)}
-              aria-pressed={selectedCategoryId === null}
+              onClick={() => handleCategoryChange(null)}
+              aria-pressed={filters.categoryId === null}
             >
               Todas
             </button>
@@ -86,12 +155,12 @@ export default function StoreProducts() {
                 key={category.id_key}
                 type="button"
                 className={
-                  selectedCategoryId === category.id_key
+                  filters.categoryId === category.id_key
                     ? "store-chip store-chip-active"
                     : "store-chip"
                 }
-                onClick={() => setSelectedCategoryId(category.id_key)}
-                aria-pressed={selectedCategoryId === category.id_key}
+                onClick={() => handleCategoryChange(category.id_key)}
+                aria-pressed={filters.categoryId === category.id_key}
               >
                 {category.name}
               </button>
@@ -100,12 +169,50 @@ export default function StoreProducts() {
         ) : null}
       </section>
 
-      {demoSections.map((section) => (
-        <article className="store-card" key={section.title}>
-          <h3>{section.title}</h3>
-          <p>{section.description}</p>
-        </article>
-      ))}
+      <section className="store-products">
+        <div className="store-products-header">
+          <div>
+            <h2>Productos destacados</h2>
+            <p className="store-muted">
+              {productStatus === "success"
+                ? `${filteredProducts.length} productos encontrados`
+                : "Cargando productos del backend"}
+            </p>
+          </div>
+        </div>
+
+        {productStatus === "loading" ? (
+          <p className="store-muted">Cargando productos...</p>
+        ) : null}
+        {productStatus === "error" ? (
+          <p className="store-muted">
+            No pudimos cargar los productos. Intenta nuevamente más tarde.
+          </p>
+        ) : null}
+        {productStatus === "success" && filteredProducts.length === 0 ? (
+          <p className="store-muted">
+            No encontramos productos con los filtros seleccionados.
+          </p>
+        ) : null}
+
+        {filteredProducts.length > 0 ? (
+          <div className="store-products-grid">
+            {filteredProducts.map((product) => {
+              const category = categoryLookup.get(product.category_id);
+              const categoryName = category?.name ?? "Sin categoría";
+
+              return (
+                <ProductCard
+                  key={product.id_key}
+                  product={product}
+                  categoryName={categoryName}
+                  imageSrc={resolveCategoryImage(categoryName)}
+                />
+              );
+            })}
+          </div>
+        ) : null}
+      </section>
     </section>
   );
 }
