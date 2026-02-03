@@ -532,6 +532,60 @@ body {
   gap: 20px;
 }
 
+.store-categories {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.store-categories-header h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: #f8fafc;
+}
+
+.store-categories-header p {
+  margin: 0;
+  color: #cbd5f5;
+}
+
+.store-category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.store-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  padding: 6px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.store-chip:hover {
+  border-color: #7dd3fc;
+  color: #7dd3fc;
+}
+
+.store-chip-active {
+  background: #7dd3fc;
+  border-color: #7dd3fc;
+  color: #0f172a;
+}
+
+.store-muted {
+  margin: 0;
+  color: #cbd5f5;
+}
+
 .store-card {
   background: rgba(30, 41, 59, 0.9);
   border-radius: 18px;
