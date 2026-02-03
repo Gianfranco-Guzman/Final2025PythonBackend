@@ -1,21 +1,17 @@
-export type DemoCategoryKey =
-  | "placa de video"
-  | "procesador"
-  | "auricular"
-  | "mouse"
-  | "teclado";
+import placaVideoImg from "../assets/images/placa-video.jpg";
+import procesadorImg from "../assets/images/procesador.jpg";
+import auricularImg from "../assets/images/auricular.jpg";
+import mouseImg from "../assets/images/mouse.jpg";
+import tecladoImg from "../assets/images/teclado.jpg";
+
+export type DemoCategoryKey = "placa de video" | "procesador" | "auricular" | "mouse" | "teclado";
 
 export const categoryImageMap: Record<DemoCategoryKey, string> = {
-  "placa de video":
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80",
-  procesador:
-    "https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?auto=format&fit=crop&w=900&q=80",
-  auricular:
-    "https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=900&q=80",
-  mouse:
-    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80",
-  teclado:
-    "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=900&q=80"
+  "placa de video": placaVideoImg,
+  procesador: procesadorImg,
+  auricular: auricularImg,
+  mouse: mouseImg,
+  teclado: tecladoImg
 };
 
 export type DemoProductSeed = {
