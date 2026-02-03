@@ -11,6 +11,7 @@ import OrdersPage from "./pages/OrdersPage";
 import ProductsPage from "./pages/ProductsPage";
 import ReviewsPage from "./pages/ReviewsPage";
 import StoreHome from "./pages/store/StoreHome";
+import StoreProductDetail from "./pages/store/StoreProductDetail";
 import StoreProducts from "./pages/store/StoreProducts";
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
       <Route path="/store" element={<StoreLayout />}>
         <Route index element={<StoreHome />} />
         <Route path="products" element={<StoreProducts />} />
+        <Route path="products/:id" element={<StoreProductDetail />} />
       </Route>
 
       <Route path="/" element={<AdminGate />}>
