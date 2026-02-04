@@ -1,5 +1,5 @@
-import { type FormEvent, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { type FormEvent, useEffect, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../../store/cartStore";
 
 type DemoUser = {
@@ -43,6 +43,30 @@ export default function StoreHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formValues, setFormValues] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      return;
+    }
+
+    const state = location.state as { openLogin?: boolean } | null;
+    const searchParams = new URLSearchParams(location.search);
+    const shouldOpen =
+      Boolean(state?.openLogin) || searchParams.get("login") === "1";
+
+    if (shouldOpen) {
+      setIsModalOpen(true);
+      setError(null);
+      if (state?.openLogin) {
+        navigate(location.pathname + location.search, {
+          replace: true,
+          state: {},
+        });
+      }
+    }
+  }, [location, navigate, user]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -112,6 +136,12 @@ export default function StoreHeader() {
           className={({ isActive }) => (isActive ? "active" : "")}
         >
           Productos
+        </NavLink>
+        <NavLink
+          to="/store/account"
+          className={({ isActive }) => (isActive ? "active" : "")}
+        >
+          Mi cuenta
         </NavLink>
       </nav>
       <div className="store-auth">
