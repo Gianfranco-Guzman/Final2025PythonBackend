@@ -11,6 +11,7 @@ import OrdersPage from "./pages/OrdersPage";
 import ProductsPage from "./pages/ProductsPage";
 import ReviewsPage from "./pages/ReviewsPage";
 import StoreHome from "./pages/store/StoreHome";
+import StoreAccount from "./pages/store/StoreAccount";
 import StoreProductDetail from "./pages/store/StoreProductDetail";
 import StoreProducts from "./pages/store/StoreProducts";
 
@@ -21,6 +22,7 @@ export default function App() {
         <Route index element={<StoreHome />} />
         <Route path="products" element={<StoreProducts />} />
         <Route path="products/:id" element={<StoreProductDetail />} />
+        <Route path="account" element={<StoreAccount />} />
       </Route>
 
       <Route path="/" element={<AdminGate />}>
