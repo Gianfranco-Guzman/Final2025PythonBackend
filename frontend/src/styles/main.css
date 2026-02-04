@@ -880,6 +880,59 @@ body {
   margin-top: 8px;
 }
 
+.store-account {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.store-account-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.store-account-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.store-account-card {
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.store-account-card h3 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.store-account-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #cbd5f5;
+}
+
+.store-account-row strong {
+  color: #f8fafc;
+}
+
+.store-account-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .store-cart {
   position: fixed;
   inset: 0;
