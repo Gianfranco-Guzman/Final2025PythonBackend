@@ -342,14 +342,25 @@ body {
   display: flex;
   justify-content: center;
   gap: 24px;
-  padding: 10px 32px;
+  padding: 12px 32px 6px;
 }
 
-.store-subnav-link {
+.store-subnav-link,
+.store-subnav-trigger {
   text-decoration: none;
   color: #e2e8f0;
   font-weight: 600;
   font-size: 14px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.store-subnav-link:hover,
+.store-subnav-trigger:hover,
+.store-subnav-link:focus-visible {
+  color: #7dd3fc;
+  border-color: #7dd3fc;
 }
 
 .store-subnav-dropdown {

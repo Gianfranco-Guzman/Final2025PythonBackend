@@ -1,7 +1,5 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { api } from "../../api/client";
-import { ApiCategory } from "../../api/types";
 import { useCart } from "../../store/cartStore";
 
 type DemoUser = {
@@ -45,7 +43,6 @@ export default function StoreHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formValues, setFormValues] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<ApiCategory[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -55,36 +52,6 @@ export default function StoreHeader() {
   useEffect(() => {
     setSearchValue(initialSearch);
   }, [initialSearch]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadCategories = async () => {
-      try {
-        const response = await api.getCategories();
-        if (isMounted) {
-          setCategories(response);
-        }
-      } catch {
-        if (isMounted) {
-          setCategories([]);
-        }
-      }
-    };
-
-    loadCategories();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const categoryLinks = useMemo(() => {
-    return categories.map((category) => ({
-      id: category.id_key,
-      name: category.name,
-    }));
-  }, [categories]);
 
   useEffect(() => {
     if (user) {
@@ -108,25 +75,18 @@ export default function StoreHeader() {
     }
   }, [location, navigate, user]);
 
-  const buildProductUrl = (params: { search?: string; category?: string | null }) => {
-    const nextParams = new URLSearchParams();
-    if (params.search) {
-      nextParams.set("search", params.search);
-    }
-    if (params.category) {
-      nextParams.set("category", params.category);
-    }
-    const query = nextParams.toString();
-    return `/store/products${query ? `?${query}` : ""}`;
-  };
-
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
     const category = searchParams.get("category");
-    const target = buildProductUrl({
-      search: value.trim() ? value : "",
-      category,
-    });
+    const nextParams = new URLSearchParams();
+    if (value.trim()) {
+      nextParams.set("search", value);
+    }
+    if (category) {
+      nextParams.set("category", category);
+    }
+    const query = nextParams.toString();
+    const target = `/store/products${query ? `?${query}` : ""}`;
     navigate(target, { replace: location.pathname === "/store/products" });
   };
 
@@ -208,40 +168,15 @@ export default function StoreHeader() {
                   Admin
                 </NavLink>
               ) : null}
-              <NavLink className="store-account-link" to="/store/account">
-                Mi cuenta
-              </NavLink>
               <button type="button" className="store-ghost" onClick={handleLogout}>
                 Cerrar sesión
               </button>
             </div>
           ) : (
-            <button type="button" className="store-button" onClick={handleOpenModal}>
-              Mi cuenta
+            <button type="button" className="store-cart-button" onClick={handleOpenModal}>
+              Ingresar
             </button>
           )}
-        </div>
-      </div>
-      <div className="store-subnav">
-        <NavLink className="store-subnav-link" to="/store/products">
-          Productos
-        </NavLink>
-        <div className="store-subnav-dropdown">
-          <span className="store-subnav-link">Categorías</span>
-          <div className="store-subnav-menu">
-            <NavLink className="store-subnav-item" to="/store/products">
-              Todas
-            </NavLink>
-            {categoryLinks.map((category) => (
-              <NavLink
-                key={category.id}
-                className="store-subnav-item"
-                to={buildProductUrl({ category: String(category.id) })}
-              >
-                {category.name}
-              </NavLink>
-            ))}
-          </div>
         </div>
       </div>
 
