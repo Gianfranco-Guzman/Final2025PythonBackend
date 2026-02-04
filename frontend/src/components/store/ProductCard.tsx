@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ApiProduct } from "../../api/types";
+import { useCart } from "../../store/cartStore";
 import { formatPrice } from "../../utils/formatters";
 
 type ProductCardProps = {
@@ -13,7 +14,13 @@ export default function ProductCard({
   categoryName,
   imageSrc
 }: ProductCardProps) {
+  const { addItem, openCart } = useCart();
   const isLowStock = product.stock <= 5;
+
+  const handleAddToCart = () => {
+    addItem(product, categoryName, imageSrc);
+    openCart();
+  };
 
   return (
     <article className="store-product-card">
@@ -35,6 +42,9 @@ export default function ProductCard({
           <Link className="store-ghost" to={`/store/products/${product.id_key}`}>
             Ver detalle
           </Link>
+          <button type="button" className="store-button" onClick={handleAddToCart}>
+            Agregar
+          </button>
         </div>
       </div>
     </article>
