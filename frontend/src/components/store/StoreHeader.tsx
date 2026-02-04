@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useCart } from "../../store/cartStore";
 
 type DemoUser = {
   email: string;
@@ -37,6 +38,7 @@ const persistUser = (user: DemoUser | null) => {
 };
 
 export default function StoreHeader() {
+  const { totalItems, toggleCart } = useCart();
   const [user, setUser] = useState<DemoUser | null>(() => getStoredUser());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formValues, setFormValues] = useState({ email: "", password: "" });
@@ -113,6 +115,10 @@ export default function StoreHeader() {
         </NavLink>
       </nav>
       <div className="store-auth">
+        <button type="button" className="store-cart-button" onClick={toggleCart}>
+          🛒 Carrito
+          {totalItems > 0 ? <span className="store-cart-count">{totalItems}</span> : null}
+        </button>
         {user ? (
           <div className="store-auth-info">
             <div>
