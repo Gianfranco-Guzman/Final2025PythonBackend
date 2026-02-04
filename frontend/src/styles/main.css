@@ -898,6 +898,7 @@ body {
   border: none;
   opacity: 0;
   transition: opacity 0.2s ease;
+  z-index: 1;
 }
 
 .store-cart-open .store-cart-backdrop {
@@ -918,6 +919,7 @@ body {
   gap: 16px;
   transform: translateX(100%);
   transition: transform 0.25s ease;
+  z-index: 2;
 }
 
 .store-cart-open .store-cart-panel {
