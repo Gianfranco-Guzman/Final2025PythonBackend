@@ -43,8 +43,7 @@ export default function StoreAccount() {
           <p className="store-pill">Mi cuenta</p>
           <h2>Hola, {user.name}</h2>
           <p className="store-muted">
-            Esta es tu sesión demo. Puedes seguir comprando o acceder al panel si
-            eres administrador.
+            Puedes seguir comprando o acceder al panel si eres administrador.
           </p>
         </div>
         <NavLink className="store-button" to="/store/products">
@@ -72,7 +71,7 @@ export default function StoreAccount() {
         <div className="store-account-card">
           <h3>Accesos rápidos</h3>
           <p className="store-muted">
-            Continúa explorando productos o vuelve al inicio de la tienda demo.
+            Continúa explorando productos o vuelve al inicio de la tienda.
           </p>
           <div className="store-account-actions">
             <NavLink className="store-ghost" to="/store">

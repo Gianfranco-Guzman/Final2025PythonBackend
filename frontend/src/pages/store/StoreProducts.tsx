@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../../api/client";
 import { ApiCategory, ApiProduct } from "../../api/types";
 import ProductCard from "../../components/store/ProductCard";
@@ -17,6 +18,7 @@ export default function StoreProducts() {
   const [categoryStatus, setCategoryStatus] = useState<FetchStatus>("idle");
   const [productStatus, setProductStatus] = useState<FetchStatus>("idle");
   const [filters, setFilters] = useState<StoreFilters>({ search: "", categoryId: null });
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     let isMounted = true;
@@ -52,6 +54,13 @@ export default function StoreProducts() {
     };
   }, []);
 
+  useEffect(() => {
+    const search = searchParams.get("search") ?? "";
+    const categoryParam = searchParams.get("category");
+    const categoryId = categoryParam ? Number(categoryParam) : null;
+    setFilters({ search, categoryId: Number.isNaN(categoryId) ? null : categoryId });
+  }, [searchParams]);
+
   const categoryLookup = useMemo(() => {
     return new Map(categories.map((category) => [category.id_key, category]));
   }, [categories]);
@@ -72,121 +81,84 @@ export default function StoreProducts() {
     });
   }, [filters.categoryId, filters.search, products]);
 
-  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setFilters((prev) => ({ ...prev, search: value }));
-  };
-
   const handleCategoryChange = (categoryId: number | null) => {
-    setFilters((prev) => ({ ...prev, categoryId }));
+    const nextParams = new URLSearchParams(searchParams);
+    if (categoryId === null) {
+      nextParams.delete("category");
+    } else {
+      nextParams.set("category", String(categoryId));
+    }
+    setSearchParams(nextParams, { replace: true });
   };
 
   return (
-    <section className="store-grid">
-      <section className="store-categories">
-        <div className="store-categories-header">
-          <div>
-            <h2>Explora por categoría</h2>
-            <p>Filtra el catálogo usando las categorías reales del backend.</p>
-          </div>
-          <label className="store-search">
-            <span>Búsqueda</span>
-            <input
-              type="search"
-              value={filters.search}
-              onChange={handleSearchChange}
-              placeholder="Busca un producto"
-            />
-          </label>
-        </div>
-        {categoryStatus === "loading" ? (
-          <p className="store-muted">Cargando categorías...</p>
-        ) : null}
-        {categoryStatus === "error" ? (
+    <section className="store-products">
+      <div className="store-products-header">
+        <div>
+          <h2>Productos</h2>
           <p className="store-muted">
-            No pudimos cargar las categorías. Intenta nuevamente más tarde.
+            {productStatus === "success"
+              ? `${filteredProducts.length} productos encontrados`
+              : "Cargando productos del backend"}
           </p>
-        ) : null}
-        {categoryStatus === "success" && categories.length === 0 ? (
-          <p className="store-muted">Aún no hay categorías disponibles.</p>
-        ) : null}
-        {categories.length > 0 ? (
-          <div className="store-category-nav" role="tablist" aria-label="Categorías">
+        </div>
+        <div className="store-products-filters">
+          {categoryStatus === "success" && filters.categoryId !== null ? (
             <button
               type="button"
-              className={
-                filters.categoryId === null
-                  ? "store-chip store-chip-active"
-                  : "store-chip"
-              }
+              className="store-chip store-chip-active"
               onClick={() => handleCategoryChange(null)}
-              aria-pressed={filters.categoryId === null}
             >
-              Todas
+              {categoryLookup.get(filters.categoryId)?.name ?? "Categoría"} ×
             </button>
-            {categories.map((category) => (
-              <button
-                key={category.id_key}
-                type="button"
-                className={
-                  filters.categoryId === category.id_key
-                    ? "store-chip store-chip-active"
-                    : "store-chip"
-                }
-                onClick={() => handleCategoryChange(category.id_key)}
-                aria-pressed={filters.categoryId === category.id_key}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      <section className="store-products">
-        <div className="store-products-header">
-          <div>
-            <h2>Productos destacados</h2>
-            <p className="store-muted">
-              {productStatus === "success"
-                ? `${filteredProducts.length} productos encontrados`
-                : "Cargando productos del backend"}
-            </p>
-          </div>
+          ) : null}
+          {filters.search ? (
+            <button
+              type="button"
+              className="store-chip"
+              onClick={() => {
+                const nextParams = new URLSearchParams(searchParams);
+                nextParams.delete("search");
+                setSearchParams(nextParams, { replace: true });
+              }}
+            >
+              {filters.search} ×
+            </button>
+          ) : null}
         </div>
+      </div>
 
-        {productStatus === "loading" ? (
-          <p className="store-muted">Cargando productos...</p>
-        ) : null}
-        {productStatus === "error" ? (
-          <p className="store-muted">
-            No pudimos cargar los productos. Intenta nuevamente más tarde.
-          </p>
-        ) : null}
-        {productStatus === "success" && filteredProducts.length === 0 ? (
-          <p className="store-muted">
-            No encontramos productos con los filtros seleccionados.
-          </p>
-        ) : null}
+      {productStatus === "loading" ? (
+        <p className="store-muted">Cargando productos...</p>
+      ) : null}
+      {productStatus === "error" ? (
+        <p className="store-muted">
+          No pudimos cargar los productos. Intenta nuevamente más tarde.
+        </p>
+      ) : null}
+      {productStatus === "success" && filteredProducts.length === 0 ? (
+        <p className="store-muted">
+          No encontramos productos con los filtros seleccionados.
+        </p>
+      ) : null}
 
-        {filteredProducts.length > 0 ? (
-          <div className="store-products-grid">
-            {filteredProducts.map((product) => {
-              const category = categoryLookup.get(product.category_id);
-              const categoryName = category?.name ?? "Sin categoría";
+      {filteredProducts.length > 0 ? (
+        <div className="store-products-grid">
+          {filteredProducts.map((product) => {
+            const category = categoryLookup.get(product.category_id);
+            const categoryName = category?.name ?? "Sin categoría";
 
-              return (
-                <ProductCard
-                  key={product.id_key}
-                  product={product}
-                  categoryName={categoryName}
-                  imageSrc={resolveCategoryImage(categoryName)}
-                />
-              );
-            })}
-          </div>
-        ) : null}
-      </section>
+            return (
+              <ProductCard
+                key={product.id_key}
+                product={product}
+                categoryName={categoryName}
+                imageSrc={resolveCategoryImage(categoryName)}
+              />
+            );
+          })}
+        </div>
+      ) : null}
     </section>
   );
 }

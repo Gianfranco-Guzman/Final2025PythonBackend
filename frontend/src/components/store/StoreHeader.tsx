@@ -1,5 +1,7 @@
-import { type FormEvent, useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { api } from "../../api/client";
+import { ApiCategory } from "../../api/types";
 import { useCart } from "../../store/cartStore";
 
 type DemoUser = {
@@ -43,8 +45,46 @@ export default function StoreHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formValues, setFormValues] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get("search") ?? "";
+  const [searchValue, setSearchValue] = useState(initialSearch);
+
+  useEffect(() => {
+    setSearchValue(initialSearch);
+  }, [initialSearch]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCategories = async () => {
+      try {
+        const response = await api.getCategories();
+        if (isMounted) {
+          setCategories(response);
+        }
+      } catch {
+        if (isMounted) {
+          setCategories([]);
+        }
+      }
+    };
+
+    loadCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const categoryLinks = useMemo(() => {
+    return categories.map((category) => ({
+      id: category.id_key,
+      name: category.name,
+    }));
+  }, [categories]);
 
   useEffect(() => {
     if (user) {
@@ -67,6 +107,28 @@ export default function StoreHeader() {
       }
     }
   }, [location, navigate, user]);
+
+  const buildProductUrl = (params: { search?: string; category?: string | null }) => {
+    const nextParams = new URLSearchParams();
+    if (params.search) {
+      nextParams.set("search", params.search);
+    }
+    if (params.category) {
+      nextParams.set("category", params.category);
+    }
+    const query = nextParams.toString();
+    return `/store/products${query ? `?${query}` : ""}`;
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    const category = searchParams.get("category");
+    const target = buildProductUrl({
+      search: value.trim() ? value : "",
+      category,
+    });
+    navigate(target, { replace: location.pathname === "/store/products" });
+  };
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -93,7 +155,7 @@ export default function StoreHeader() {
     ) {
       const adminUser: DemoUser = {
         email: formValues.email.trim().toLowerCase(),
-        name: "Administrador demo",
+        name: "Administrador",
         role: "admin",
       };
       persistUser(adminUser);
@@ -104,7 +166,7 @@ export default function StoreHeader() {
 
     const customerUser: DemoUser = {
       email: formValues.email.trim().toLowerCase(),
-      name: "Cliente demo",
+      name: "Cliente",
       role: "customer",
     };
     persistUser(customerUser);
@@ -119,56 +181,68 @@ export default function StoreHeader() {
 
   return (
     <header className="store-header">
-      <div>
-        <p className="store-overline">TechStore</p>
-        <h1>Tienda demo</h1>
-      </div>
-      <nav className="store-nav">
-        <NavLink
-          to="/store"
-          end
-          className={({ isActive }) => (isActive ? "active" : "")}
-        >
-          Inicio
+      <div className="store-topbar">
+        <NavLink className="store-brand" to="/store">
+          TECHSTORE
         </NavLink>
-        <NavLink
-          to="/store/products"
-          className={({ isActive }) => (isActive ? "active" : "")}
-        >
+        <label className="store-search">
+          <input
+            type="search"
+            value={searchValue}
+            onChange={(event) => handleSearchChange(event.target.value)}
+            placeholder="Buscar productos"
+          />
+        </label>
+        <div className="store-auth">
+          <button type="button" className="store-cart-button" onClick={toggleCart}>
+            🛒 Carrito
+            {totalItems > 0 ? (
+              <span className="store-cart-count">{totalItems}</span>
+            ) : null}
+          </button>
+          {user ? (
+            <div className="store-auth-info">
+              <span className="store-auth-name">{user.name}</span>
+              {user.role === "admin" ? (
+                <NavLink className="store-admin-link" to="/dashboard">
+                  Admin
+                </NavLink>
+              ) : null}
+              <NavLink className="store-account-link" to="/store/account">
+                Mi cuenta
+              </NavLink>
+              <button type="button" className="store-ghost" onClick={handleLogout}>
+                Cerrar sesión
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="store-button" onClick={handleOpenModal}>
+              Mi cuenta
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="store-subnav">
+        <NavLink className="store-subnav-link" to="/store/products">
           Productos
         </NavLink>
-        <NavLink
-          to="/store/account"
-          className={({ isActive }) => (isActive ? "active" : "")}
-        >
-          Mi cuenta
-        </NavLink>
-      </nav>
-      <div className="store-auth">
-        <button type="button" className="store-cart-button" onClick={toggleCart}>
-          🛒 Carrito
-          {totalItems > 0 ? <span className="store-cart-count">{totalItems}</span> : null}
-        </button>
-        {user ? (
-          <div className="store-auth-info">
-            <div>
-              <p className="store-auth-name">{user.name}</p>
-              <p className="store-auth-email">{user.email}</p>
-            </div>
-            {user.role === "admin" ? (
-              <NavLink className="store-admin-link" to="/dashboard">
-                Ir al admin
+        <div className="store-subnav-dropdown">
+          <span className="store-subnav-link">Categorías</span>
+          <div className="store-subnav-menu">
+            <NavLink className="store-subnav-item" to="/store/products">
+              Todas
+            </NavLink>
+            {categoryLinks.map((category) => (
+              <NavLink
+                key={category.id}
+                className="store-subnav-item"
+                to={buildProductUrl({ category: String(category.id) })}
+              >
+                {category.name}
               </NavLink>
-            ) : null}
-            <button type="button" className="store-button" onClick={handleLogout}>
-              Cerrar sesión
-            </button>
+            ))}
           </div>
-        ) : (
-          <button type="button" className="store-button" onClick={handleOpenModal}>
-            Iniciar sesión
-          </button>
-        )}
+        </div>
       </div>
 
       {isModalOpen ? (
@@ -176,8 +250,8 @@ export default function StoreHeader() {
           <div className="store-modal-card">
             <div className="store-modal-header">
               <div>
-                <p className="store-modal-overline">Demo login</p>
-                <h2>Acceso a TechStore</h2>
+                <p className="store-modal-overline">Ingreso</p>
+                <h2>Acceso a TECHSTORE</h2>
               </div>
               <button
                 type="button"
@@ -197,7 +271,7 @@ export default function StoreHeader() {
                   onChange={(event) =>
                     setFormValues((prev) => ({ ...prev, email: event.target.value }))
                   }
-                  placeholder="cliente@demo.com"
+                  placeholder="cliente@correo.com"
                 />
               </label>
               <label>
@@ -208,7 +282,7 @@ export default function StoreHeader() {
                   onChange={(event) =>
                     setFormValues((prev) => ({ ...prev, password: event.target.value }))
                   }
-                  placeholder="••••••"
+                  placeholder="Ingresa tu contraseña"
                 />
               </label>
               {error ? <p className="store-modal-error">{error}</p> : null}
@@ -220,9 +294,6 @@ export default function StoreHeader() {
                   Entrar
                 </button>
               </div>
-              <p className="store-modal-hint">
-                Admin demo: {ADMIN_EMAIL} · {ADMIN_PASSWORD}
-              </p>
             </form>
           </div>
         </div>
