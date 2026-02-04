@@ -91,6 +91,10 @@ export default function StoreProducts() {
     setSearchParams(nextParams, { replace: true });
   };
 
+  const handleClearFilters = () => {
+    setSearchParams(new URLSearchParams(), { replace: true });
+  };
+
   return (
     <section className="store-products">
       <div className="store-products-header">
@@ -132,14 +136,19 @@ export default function StoreProducts() {
         <p className="store-muted">Cargando productos...</p>
       ) : null}
       {productStatus === "error" ? (
-        <p className="store-muted">
-          No pudimos cargar los productos. Intenta nuevamente más tarde.
-        </p>
+        <div className="store-card store-empty-state">
+          <h3>No pudimos cargar los productos</h3>
+          <p>Intenta nuevamente más tarde o recarga la página.</p>
+        </div>
       ) : null}
       {productStatus === "success" && filteredProducts.length === 0 ? (
-        <p className="store-muted">
-          No encontramos productos con los filtros seleccionados.
-        </p>
+        <div className="store-card store-empty-state">
+          <h3>No encontramos productos</h3>
+          <p>Prueba con otra búsqueda o limpia los filtros para ver todo el catálogo.</p>
+          <button type="button" className="store-ghost" onClick={handleClearFilters}>
+            Limpiar filtros
+          </button>
+        </div>
       ) : null}
 
       {filteredProducts.length > 0 ? (

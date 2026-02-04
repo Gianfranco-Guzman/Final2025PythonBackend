@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import CartDrawer from "../components/store/CartDrawer";
+import StoreFooter from "../components/store/StoreFooter";
 import StoreHeader from "../components/store/StoreHeader";
 import StoreSubnav from "../components/store/StoreSubnav";
 import { CartProvider } from "../store/cartStore";
@@ -16,6 +17,7 @@ export default function StoreLayout() {
             <Outlet />
           </div>
         </main>
+        <StoreFooter />
       </div>
       <CartDrawer />
     </CartProvider>
