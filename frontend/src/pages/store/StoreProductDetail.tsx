@@ -3,11 +3,13 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../../api/client";
 import { ApiProduct } from "../../api/types";
 import { resolveCategoryImage } from "../../data/storeAssets";
+import { useCart } from "../../store/cartStore";
 import { formatPrice } from "../../utils/formatters";
 
 type FetchStatus = "idle" | "loading" | "success" | "error";
 
 export default function StoreProductDetail() {
+  const { addItem, openCart } = useCart();
   const { id } = useParams();
   const productId = Number(id);
   const [status, setStatus] = useState<FetchStatus>("idle");
@@ -68,6 +70,14 @@ export default function StoreProductDetail() {
     return resolveCategoryImage(categoryName);
   }, [categoryName, product]);
 
+  const handleAddToCart = () => {
+    if (!product) {
+      return;
+    }
+    addItem(product, categoryName, imageSrc);
+    openCart();
+  };
+
   return (
     <section className="store-detail">
       <Link className="store-link" to="/store/products">
@@ -116,7 +126,12 @@ export default function StoreProductDetail() {
               </div>
             </div>
             <div className="store-detail-actions">
-              <button type="button" className="store-button">
+              <button
+                type="button"
+                className="store-button"
+                onClick={handleAddToCart}
+                disabled={product.stock <= 0}
+              >
                 Agregar al carrito
               </button>
               <Link className="store-ghost" to="/store/products">
