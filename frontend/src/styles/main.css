@@ -1004,6 +1004,9 @@ body {
 .store-cart-actions span {
   min-width: 24px;
   text-align: center;
+  color: #7dd3fc;
+    font-weight: 700;
+    font-size: 14px;
 }
 
 .store-cart-remove {
