@@ -10,7 +10,9 @@ export default function StoreLayout() {
         <StoreHeader />
 
         <main className="store-content">
-          <Outlet />
+          <div className="store-container">
+            <Outlet />
+          </div>
         </main>
       </div>
       <CartDrawer />
