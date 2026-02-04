@@ -1,6 +1,6 @@
 import { categoryImageMap, DemoCategoryKey } from "./storeAssets";
 
-export { categoryImageMap, DemoCategoryKey };
+export { categoryImageMap, type DemoCategoryKey };
 
 export type DemoProductSeed = {
   name: string;
