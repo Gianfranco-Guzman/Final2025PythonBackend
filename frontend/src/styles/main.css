@@ -316,6 +316,10 @@ body {
   flex-direction: column;
   background: #0b1120;
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.5);
 }
 
 .store-topbar {
@@ -324,9 +328,6 @@ body {
   gap: 24px;
   align-items: center;
   padding: 18px 32px;
-  position: sticky;
-  top: 0;
-  z-index: 30;
   background: #0b1120;
 }
 
