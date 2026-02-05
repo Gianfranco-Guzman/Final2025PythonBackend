@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCart } from "../../store/cartStore";
 import { formatPrice } from "../../utils/formatters";
 
@@ -24,9 +25,12 @@ export default function CartDrawer() {
         </div>
 
         {items.length === 0 ? (
-          <div className="store-card">
+          <div className="store-card store-empty-state">
             <h3>Tu carrito está vacío</h3>
             <p>Explora los productos para sumar tu primera selección.</p>
+            <Link className="store-button" to="/store/products" onClick={closeCart}>
+              Ver productos
+            </Link>
           </div>
         ) : (
           <div className="store-cart-body">
@@ -75,6 +79,7 @@ export default function CartDrawer() {
               <div>
                 <p className="store-muted">Total</p>
                 <p className="store-cart-total">{formatPrice(totalPrice)}</p>
+                <p className="store-feedback">Checkout demo, sin cobro real.</p>
               </div>
               <button type="button" className="store-button">
                 Finalizar compra
