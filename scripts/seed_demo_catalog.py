@@ -79,9 +79,17 @@ def fetch_products() -> List[dict]:
     return response.json()
 
 
+def extract_id(item: dict) -> int:
+    return item.get("id_key") or item.get("id")
+
+
 def ensure_categories() -> Dict[str, int]:
     existing = fetch_categories()
-    lookup = {item["name"].strip().lower(): item["id"] for item in existing}
+    lookup = {
+        item["name"].strip().lower(): extract_id(item)
+        for item in existing
+        if extract_id(item) is not None
+    }
     category_ids: Dict[str, int] = {}
 
     for name in CATEGORIES:
@@ -93,7 +101,10 @@ def ensure_categories() -> Dict[str, int]:
         response = requests.post(f"{API_BASE_URL}/categories", json={"name": name})
         response.raise_for_status()
         created = response.json()
-        category_ids[key] = created["id"]
+        created_id = extract_id(created)
+        if created_id is None:
+            raise KeyError(f"Missing id in category response: {created}")
+        category_ids[key] = created_id
 
     return category_ids
 
@@ -101,8 +112,9 @@ def ensure_categories() -> Dict[str, int]:
 def ensure_products(category_ids: Dict[str, int]) -> Tuple[int, int]:
     existing_products = fetch_products()
     existing_lookup = {
-        (item["name"].strip().lower(), item.get("category_id")): item["id"]
+        (item["name"].strip().lower(), item.get("category_id")): extract_id(item)
         for item in existing_products
+        if extract_id(item) is not None
     }
 
     created_count = 0
