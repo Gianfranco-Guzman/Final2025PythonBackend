@@ -121,8 +121,8 @@ export default function StoreHeader() {
     setError(null);
     setSuccessMessage(null);
 
-    if (!loginValues.email) {
-      setError("Ingresa correo para continuar.");
+    if (!loginValues.email || !loginValues.password) {
+      setError("Ingresa correo y contraseña para continuar.");
       return;
     }
 
@@ -190,7 +190,7 @@ export default function StoreHeader() {
         email: registerValues.email.trim().toLowerCase(),
         telephone: registerValues.telephone.trim() || null
       });
-      setSuccessMessage("Registro exitoso. Ahora puedes ingresar con tu correo.");
+      setSuccessMessage("Tu cuenta fue creada con éxito.");
       setAuthMode("login");
       setLoginValues({ email: registerValues.email.trim().toLowerCase(), password: "" });
       setRegisterValues({ name: "", lastname: "", email: "", telephone: "" });
@@ -295,7 +295,7 @@ export default function StoreHeader() {
               {authMode === "login" ? (
                 <>
                   <label>
-                    Correo
+                    Correo electrónico
                     <input
                       type="email"
                       value={loginValues.email}
@@ -306,7 +306,7 @@ export default function StoreHeader() {
                     />
                   </label>
                   <label>
-                    Contraseña (solo admin)
+                    Contraseña
                     <input
                       type="password"
                       value={loginValues.password}
@@ -316,7 +316,6 @@ export default function StoreHeader() {
                       placeholder="Ingresa tu contraseña"
                     />
                   </label>
-                  <p>Demo: el acceso de clientes se valida por correo contra /clients.</p>
                 </>
               ) : (
                 <>
@@ -343,7 +342,7 @@ export default function StoreHeader() {
                     />
                   </label>
                   <label>
-                    Correo
+                    Correo electrónico
                     <input
                       type="email"
                       value={registerValues.email}
