@@ -110,6 +110,36 @@ body {
   color: #475569;
 }
 
+
+.seed-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 760px;
+}
+
+.seed-actions button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: #0ea5e9;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.seed-actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.seed-result {
+  color: #0f766e;
+  font-weight: 600;
+}
+
 .status {
   background: #e2e8f0;
   padding: 12px 18px;

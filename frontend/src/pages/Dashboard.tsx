@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { ApiCategory, ApiHealthCheck, ApiProduct } from "../api/types";
+import { seedAdminDemoData } from "../store/adminDemoSeed";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("es-AR", {
@@ -15,6 +16,8 @@ export default function Dashboard() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [seedResult, setSeedResult] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState<boolean>(false);
 
   useEffect(() => {
     const load = async () => {
@@ -36,6 +39,22 @@ export default function Dashboard() {
     load();
   }, []);
 
+  const handleSeedData = async () => {
+    setSeeding(true);
+    setError(null);
+    setSeedResult(null);
+    try {
+      const result = await seedAdminDemoData();
+      setSeedResult(
+        `Carga lista: +${result.clients} clientes, +${result.addresses} direcciones, +${result.bills} facturas, +${result.orders} órdenes, +${result.orderDetails} detalles, +${result.reviews} reviews.`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <div className="dashboard">
       <header className="hero">
@@ -43,9 +62,16 @@ export default function Dashboard() {
           <p className="overline">E-commerce API</p>
           <h1>Panel inicial para consumir la API</h1>
           <p className="subtitle">
-            Este dashboard valida la conexión con el backend, lista categorías y
-            productos usando los endpoints existentes.
+            Administra datos de la tienda y completa contenido real para la demo.
           </p>
+          <div className="seed-actions">
+            <button type="button" onClick={handleSeedData} disabled={seeding}>
+              {seeding
+                ? "Cargando datos de ejemplo..."
+                : "Cargar datos demo para admin"}
+            </button>
+            {seedResult ? <p className="seed-result">{seedResult}</p> : null}
+          </div>
         </div>
         <div className="status">
           <span>Estado API</span>
