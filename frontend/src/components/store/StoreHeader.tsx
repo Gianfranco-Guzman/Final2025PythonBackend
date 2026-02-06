@@ -2,42 +2,10 @@ import { type FormEvent, useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../api/client";
 import { useCart } from "../../store/cartStore";
-
-type DemoUser = {
-  email: string;
-  name: string;
-  role: "admin" | "customer";
-  clientId?: number;
-};
+import { DemoUser, getStoredUser, persistUser } from "../../store/accountStorage";
 
 const ADMIN_EMAIL = "admin@admin.com";
 const ADMIN_PASSWORD = "admin1234";
-const STORAGE_USER_KEY = "demoUser";
-const STORAGE_ADMIN_KEY = "isAdmin";
-
-const getStoredUser = (): DemoUser | null => {
-  const raw = localStorage.getItem(STORAGE_USER_KEY);
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw) as DemoUser;
-  } catch {
-    return null;
-  }
-};
-
-const persistUser = (user: DemoUser | null) => {
-  if (!user) {
-    localStorage.removeItem(STORAGE_USER_KEY);
-    localStorage.removeItem(STORAGE_ADMIN_KEY);
-    return;
-  }
-
-  localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user));
-  localStorage.setItem(STORAGE_ADMIN_KEY, String(user.role === "admin"));
-};
 
 export default function StoreHeader() {
   const { totalItems, toggleCart } = useCart();
