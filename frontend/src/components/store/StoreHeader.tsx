@@ -1,11 +1,13 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { api } from "../../api/client";
 import { useCart } from "../../store/cartStore";
 
 type DemoUser = {
   email: string;
   name: string;
   role: "admin" | "customer";
+  clientId?: number;
 };
 
 const ADMIN_EMAIL = "admin@admin.com";
@@ -41,8 +43,17 @@ export default function StoreHeader() {
   const { totalItems, toggleCart } = useCart();
   const [user, setUser] = useState<DemoUser | null>(() => getStoredUser());
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formValues, setFormValues] = useState({ email: "", password: "" });
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [loginValues, setLoginValues] = useState({ email: "", password: "" });
+  const [registerValues, setRegisterValues] = useState({
+    name: "",
+    lastname: "",
+    email: "",
+    telephone: ""
+  });
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -93,30 +104,38 @@ export default function StoreHeader() {
   const handleOpenModal = () => {
     setIsModalOpen(true);
     setError(null);
+    setSuccessMessage(null);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setFormValues({ email: "", password: "" });
+    setAuthMode("login");
+    setLoginValues({ email: "", password: "" });
+    setRegisterValues({ name: "", lastname: "", email: "", telephone: "" });
     setError(null);
+    setSuccessMessage(null);
   };
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
+    setSuccessMessage(null);
 
-    if (!formValues.email || !formValues.password) {
+    if (!loginValues.email || !loginValues.password) {
       setError("Ingresa correo y contraseña para continuar.");
       return;
     }
 
+    const normalizedEmail = loginValues.email.trim().toLowerCase();
+
     if (
-      formValues.email.trim().toLowerCase() === ADMIN_EMAIL &&
-      formValues.password === ADMIN_PASSWORD
+      normalizedEmail === ADMIN_EMAIL &&
+      loginValues.password === ADMIN_PASSWORD
     ) {
       const adminUser: DemoUser = {
-        email: formValues.email.trim().toLowerCase(),
+        email: normalizedEmail,
         name: "Administrador",
-        role: "admin",
+        role: "admin"
       };
       persistUser(adminUser);
       setUser(adminUser);
@@ -124,14 +143,62 @@ export default function StoreHeader() {
       return;
     }
 
-    const customerUser: DemoUser = {
-      email: formValues.email.trim().toLowerCase(),
-      name: "Cliente",
-      role: "customer",
-    };
-    persistUser(customerUser);
-    setUser(customerUser);
-    handleCloseModal();
+    setIsSubmitting(true);
+    try {
+      const clients = await api.getClients();
+      const matchingClient = clients.find(
+        (client) => client.email?.trim().toLowerCase() === normalizedEmail
+      );
+
+      if (!matchingClient) {
+        setError("No encontramos ese correo. Regístrate primero para ingresar.");
+        return;
+      }
+
+      const fullName = `${matchingClient.name ?? ""} ${matchingClient.lastname ?? ""}`.trim();
+      const customerUser: DemoUser = {
+        email: normalizedEmail,
+        name: fullName || "Cliente",
+        role: "customer",
+        clientId: matchingClient.id_key
+      };
+      persistUser(customerUser);
+      setUser(customerUser);
+      handleCloseModal();
+    } catch {
+      setError("No fue posible validar el ingreso en este momento.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setSuccessMessage(null);
+
+    if (!registerValues.name || !registerValues.lastname || !registerValues.email) {
+      setError("Completa nombre, apellido y correo para registrarte.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await api.createClient({
+        name: registerValues.name.trim(),
+        lastname: registerValues.lastname.trim(),
+        email: registerValues.email.trim().toLowerCase(),
+        telephone: registerValues.telephone.trim() || null
+      });
+      setSuccessMessage("Tu cuenta fue creada con éxito.");
+      setAuthMode("login");
+      setLoginValues({ email: registerValues.email.trim().toLowerCase(), password: "" });
+      setRegisterValues({ name: "", lastname: "", email: "", telephone: "" });
+    } catch {
+      setError("No fue posible completar el registro. Verifica el correo e inténtalo otra vez.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleLogout = () => {
@@ -197,36 +264,119 @@ export default function StoreHeader() {
                 ×
               </button>
             </div>
-            <form className="store-modal-form" onSubmit={handleLogin}>
-              <label>
-                Correo
-                <input
-                  type="email"
-                  value={formValues.email}
-                  onChange={(event) =>
-                    setFormValues((prev) => ({ ...prev, email: event.target.value }))
-                  }
-                  placeholder="cliente@correo.com"
-                />
-              </label>
-              <label>
-                Contraseña
-                <input
-                  type="password"
-                  value={formValues.password}
-                  onChange={(event) =>
-                    setFormValues((prev) => ({ ...prev, password: event.target.value }))
-                  }
-                  placeholder="Ingresa tu contraseña"
-                />
-              </label>
+            <div className="store-modal-actions">
+              <button
+                type="button"
+                className={authMode === "login" ? "store-button" : "store-ghost"}
+                onClick={() => {
+                  setAuthMode("login");
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                Ingresar
+              </button>
+              <button
+                type="button"
+                className={authMode === "register" ? "store-button" : "store-ghost"}
+                onClick={() => {
+                  setAuthMode("register");
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                Registrarse
+              </button>
+            </div>
+            <form
+              className="store-modal-form"
+              onSubmit={authMode === "login" ? handleLogin : handleRegister}
+            >
+              {authMode === "login" ? (
+                <>
+                  <label>
+                    Correo electrónico
+                    <input
+                      type="email"
+                      value={loginValues.email}
+                      onChange={(event) =>
+                        setLoginValues((prev) => ({ ...prev, email: event.target.value }))
+                      }
+                      placeholder="cliente@correo.com"
+                    />
+                  </label>
+                  <label>
+                    Contraseña
+                    <input
+                      type="password"
+                      value={loginValues.password}
+                      onChange={(event) =>
+                        setLoginValues((prev) => ({ ...prev, password: event.target.value }))
+                      }
+                      placeholder="Ingresa tu contraseña"
+                    />
+                  </label>
+                </>
+              ) : (
+                <>
+                  <label>
+                    Nombre
+                    <input
+                      type="text"
+                      value={registerValues.name}
+                      onChange={(event) =>
+                        setRegisterValues((prev) => ({ ...prev, name: event.target.value }))
+                      }
+                      placeholder="Tu nombre"
+                    />
+                  </label>
+                  <label>
+                    Apellido
+                    <input
+                      type="text"
+                      value={registerValues.lastname}
+                      onChange={(event) =>
+                        setRegisterValues((prev) => ({ ...prev, lastname: event.target.value }))
+                      }
+                      placeholder="Tu apellido"
+                    />
+                  </label>
+                  <label>
+                    Correo electrónico
+                    <input
+                      type="email"
+                      value={registerValues.email}
+                      onChange={(event) =>
+                        setRegisterValues((prev) => ({ ...prev, email: event.target.value }))
+                      }
+                      placeholder="cliente@correo.com"
+                    />
+                  </label>
+                  <label>
+                    Teléfono
+                    <input
+                      type="tel"
+                      value={registerValues.telephone}
+                      onChange={(event) =>
+                        setRegisterValues((prev) => ({ ...prev, telephone: event.target.value }))
+                      }
+                      placeholder="Opcional"
+                    />
+                  </label>
+                </>
+              )}
               {error ? <p className="store-modal-error">{error}</p> : null}
+              {successMessage ? <p>{successMessage}</p> : null}
               <div className="store-modal-actions">
                 <button type="button" className="store-ghost" onClick={handleCloseModal}>
                   Cancelar
                 </button>
-                <button type="submit" className="store-button">
-                  Entrar
+                <button type="submit" className="store-button" disabled={isSubmitting}>
+                  {isSubmitting
+                    ? "Procesando..."
+                    : authMode === "login"
+                      ? "Entrar"
+                      : "Crear cuenta"}
                 </button>
               </div>
             </form>
