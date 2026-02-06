@@ -38,7 +38,7 @@ export default function StoreProducts() {
         setProducts(productResponse);
         setCategoryStatus("success");
         setProductStatus("success");
-      } catch (error) {
+      } catch {
         if (!isMounted) {
           return;
         }
@@ -61,6 +61,7 @@ export default function StoreProducts() {
       .split(",")
       .map((value) => Number(value.trim()))
       .filter((value) => Number.isInteger(value));
+
     setFilters({ search, categoryIds: Array.from(new Set(categoryIds)) });
   }, [searchParams]);
 
@@ -87,6 +88,21 @@ export default function StoreProducts() {
     });
   }, [filters.categoryIds, filters.search, products]);
 
+  const handleCategoryToggle = (categoryId: number) => {
+    const nextParams = new URLSearchParams(searchParams);
+    const nextCategories = filters.categoryIds.includes(categoryId)
+      ? filters.categoryIds.filter((id) => id !== categoryId)
+      : [...filters.categoryIds, categoryId];
+
+    if (nextCategories.length === 0) {
+      nextParams.delete("category");
+    } else {
+      nextParams.set("category", nextCategories.join(","));
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  };
+
   const handleClearFilters = () => {
     setSearchParams(new URLSearchParams(), { replace: true });
   };
@@ -102,14 +118,45 @@ export default function StoreProducts() {
               : "Cargando productos del backend"}
           </p>
         </div>
+
         <div className="store-products-filters">
-          {categoryStatus === "success"
-            ? filters.categoryIds.map((categoryId) => (
-                <span key={categoryId} className="store-chip store-chip-active">
-                  {categoryLookup.get(categoryId)?.name ?? "Categoría"}
-                </span>
-              ))
-            : null}
+          {categoryStatus === "success" ? (
+            <>
+              <label
+                className={
+                  filters.categoryIds.length === 0
+                    ? "store-chip store-chip-active"
+                    : "store-chip"
+                }
+              >
+                <input
+                  type="checkbox"
+                  checked={filters.categoryIds.length === 0}
+                  onChange={handleClearFilters}
+                />
+                Todas
+              </label>
+
+              {categories.map((category) => {
+                const isSelected = filters.categoryIds.includes(category.id_key);
+
+                return (
+                  <label
+                    key={category.id_key}
+                    className={isSelected ? "store-chip store-chip-active" : "store-chip"}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleCategoryToggle(category.id_key)}
+                    />
+                    {category.name}
+                  </label>
+                );
+              })}
+            </>
+          ) : null}
+
           {filters.search ? (
             <button
               type="button"
@@ -123,6 +170,7 @@ export default function StoreProducts() {
               {filters.search} ×
             </button>
           ) : null}
+
           {filters.categoryIds.length > 0 || filters.search ? (
             <button type="button" className="store-ghost" onClick={handleClearFilters}>
               Limpiar filtros

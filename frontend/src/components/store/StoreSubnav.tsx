@@ -6,7 +6,7 @@ export default function StoreSubnav() {
       <NavLink className="store-subnav-link" to="/store/products">
         Productos
       </NavLink>
-      <NavLink className="store-subnav-link" to="/store/categories">
+      <NavLink className="store-subnav-link" to="/store/products">
         Categorías
       </NavLink>
     </div>
