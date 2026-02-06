@@ -758,6 +758,13 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.store-chip input {
+  accent-color: #7dd3fc;
 }
 
 .store-chip:hover {

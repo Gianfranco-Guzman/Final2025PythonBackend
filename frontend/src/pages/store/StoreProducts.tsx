@@ -9,7 +9,7 @@ type FetchStatus = "idle" | "loading" | "success" | "error";
 
 type StoreFilters = {
   search: string;
-  categoryId: number | null;
+  categoryIds: number[];
 };
 
 export default function StoreProducts() {
@@ -17,7 +17,7 @@ export default function StoreProducts() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [categoryStatus, setCategoryStatus] = useState<FetchStatus>("idle");
   const [productStatus, setProductStatus] = useState<FetchStatus>("idle");
-  const [filters, setFilters] = useState<StoreFilters>({ search: "", categoryId: null });
+  const [filters, setFilters] = useState<StoreFilters>({ search: "", categoryIds: [] });
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -56,9 +56,12 @@ export default function StoreProducts() {
 
   useEffect(() => {
     const search = searchParams.get("search") ?? "";
-    const categoryParam = searchParams.get("category");
-    const categoryId = categoryParam ? Number(categoryParam) : null;
-    setFilters({ search, categoryId: Number.isNaN(categoryId) ? null : categoryId });
+    const categoryParam = searchParams.get("category") ?? "";
+    const categoryIds = categoryParam
+      .split(",")
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isInteger(value));
+    setFilters({ search, categoryIds: Array.from(new Set(categoryIds)) });
   }, [searchParams]);
 
   const categoryLookup = useMemo(() => {
@@ -69,7 +72,10 @@ export default function StoreProducts() {
     const normalizedSearch = filters.search.trim().toLowerCase();
 
     return products.filter((product) => {
-      if (filters.categoryId !== null && product.category_id !== filters.categoryId) {
+      if (
+        filters.categoryIds.length > 0 &&
+        !filters.categoryIds.includes(product.category_id)
+      ) {
         return false;
       }
 
@@ -79,17 +85,7 @@ export default function StoreProducts() {
 
       return product.name.toLowerCase().includes(normalizedSearch);
     });
-  }, [filters.categoryId, filters.search, products]);
-
-  const handleCategoryChange = (categoryId: number | null) => {
-    const nextParams = new URLSearchParams(searchParams);
-    if (categoryId === null) {
-      nextParams.delete("category");
-    } else {
-      nextParams.set("category", String(categoryId));
-    }
-    setSearchParams(nextParams, { replace: true });
-  };
+  }, [filters.categoryIds, filters.search, products]);
 
   const handleClearFilters = () => {
     setSearchParams(new URLSearchParams(), { replace: true });
@@ -107,15 +103,13 @@ export default function StoreProducts() {
           </p>
         </div>
         <div className="store-products-filters">
-          {categoryStatus === "success" && filters.categoryId !== null ? (
-            <button
-              type="button"
-              className="store-chip store-chip-active"
-              onClick={() => handleCategoryChange(null)}
-            >
-              {categoryLookup.get(filters.categoryId)?.name ?? "Categoría"} ×
-            </button>
-          ) : null}
+          {categoryStatus === "success"
+            ? filters.categoryIds.map((categoryId) => (
+                <span key={categoryId} className="store-chip store-chip-active">
+                  {categoryLookup.get(categoryId)?.name ?? "Categoría"}
+                </span>
+              ))
+            : null}
           {filters.search ? (
             <button
               type="button"
@@ -127,6 +121,11 @@ export default function StoreProducts() {
               }}
             >
               {filters.search} ×
+            </button>
+          ) : null}
+          {filters.categoryIds.length > 0 || filters.search ? (
+            <button type="button" className="store-ghost" onClick={handleClearFilters}>
+              Limpiar filtros
             </button>
           ) : null}
         </div>
