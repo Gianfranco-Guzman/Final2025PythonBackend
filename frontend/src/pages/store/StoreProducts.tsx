@@ -87,20 +87,6 @@ export default function StoreProducts() {
     });
   }, [filters.categoryIds, filters.search, products]);
 
-  const handleCategoryToggle = (categoryId: number) => {
-    const nextParams = new URLSearchParams(searchParams);
-    const nextCategories = filters.categoryIds.includes(categoryId)
-      ? filters.categoryIds.filter((id) => id !== categoryId)
-      : [...filters.categoryIds, categoryId];
-
-    if (nextCategories.length === 0) {
-      nextParams.delete("category");
-    } else {
-      nextParams.set("category", nextCategories.join(","));
-    }
-    setSearchParams(nextParams, { replace: true });
-  };
-
   const handleClearFilters = () => {
     setSearchParams(new URLSearchParams(), { replace: true });
   };
@@ -118,22 +104,11 @@ export default function StoreProducts() {
         </div>
         <div className="store-products-filters">
           {categoryStatus === "success"
-            ? categories.map((category) => {
-                const isSelected = filters.categoryIds.includes(category.id_key);
-                return (
-                  <label
-                    key={category.id_key}
-                    className={isSelected ? "store-chip store-chip-active" : "store-chip"}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleCategoryToggle(category.id_key)}
-                    />
-                    {category.name}
-                  </label>
-                );
-              })
+            ? filters.categoryIds.map((categoryId) => (
+                <span key={categoryId} className="store-chip store-chip-active">
+                  {categoryLookup.get(categoryId)?.name ?? "Categoría"}
+                </span>
+              ))
             : null}
           {filters.search ? (
             <button

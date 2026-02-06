@@ -14,6 +14,7 @@ import StoreHome from "./pages/store/StoreHome";
 import StoreAccount from "./pages/store/StoreAccount";
 import StoreProductDetail from "./pages/store/StoreProductDetail";
 import StoreProducts from "./pages/store/StoreProducts";
+import StoreCategories from "./pages/store/StoreCategories";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
       <Route path="/store" element={<StoreLayout />}>
         <Route index element={<StoreHome />} />
         <Route path="products" element={<StoreProducts />} />
+        <Route path="categories" element={<StoreCategories />} />
         <Route path="products/:id" element={<StoreProductDetail />} />
         <Route path="account" element={<StoreAccount />} />
       </Route>
