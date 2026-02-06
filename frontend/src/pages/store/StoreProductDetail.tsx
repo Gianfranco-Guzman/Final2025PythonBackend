@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api/client";
 import { ApiProduct } from "../../api/types";
 import { resolveCategoryImage } from "../../data/storeAssets";
+import { getStoredUser } from "../../store/accountStorage";
 import { useCart } from "../../store/cartStore";
 import { formatPrice } from "../../utils/formatters";
 
@@ -10,6 +11,8 @@ type FetchStatus = "idle" | "loading" | "success" | "error";
 
 export default function StoreProductDetail() {
   const { addItem, openCart } = useCart();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const productId = Number(id);
   const [status, setStatus] = useState<FetchStatus>("idle");
@@ -74,6 +77,15 @@ export default function StoreProductDetail() {
     if (!product) {
       return;
     }
+
+    const user = getStoredUser();
+    if (!user) {
+      navigate(`${location.pathname}${location.search}`, {
+        state: { openLogin: true }
+      });
+      return;
+    }
+
     addItem(product, categoryName, imageSrc);
     openCart();
   };
