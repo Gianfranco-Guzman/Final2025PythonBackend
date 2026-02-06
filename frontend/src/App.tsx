@@ -15,6 +15,7 @@ import StoreAccount from "./pages/store/StoreAccount";
 import StoreProductDetail from "./pages/store/StoreProductDetail";
 import StoreProducts from "./pages/store/StoreProducts";
 import StoreCategories from "./pages/store/StoreCategories";
+import StoreCheckoutSuccess from "./pages/store/StoreCheckoutSuccess";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="categories" element={<StoreCategories />} />
         <Route path="products/:id" element={<StoreProductDetail />} />
         <Route path="account" element={<StoreAccount />} />
+        <Route path="checkout-success" element={<StoreCheckoutSuccess />} />
       </Route>
 
       <Route path="/" element={<AdminGate />}>
