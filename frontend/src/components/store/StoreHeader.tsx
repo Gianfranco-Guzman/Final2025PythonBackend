@@ -198,6 +198,9 @@ export default function StoreHeader() {
           {user ? (
             <div className="store-auth-info">
               <span className="store-auth-name">{user.name}</span>
+              <NavLink className="store-ghost" to="/store/account">
+                Mi cuenta
+              </NavLink>
               {user.role === "admin" ? (
                 <NavLink className="store-admin-link" to="/dashboard">
                   Admin

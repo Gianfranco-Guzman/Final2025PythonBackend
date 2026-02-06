@@ -200,7 +200,7 @@ export default function CartDrawer() {
             </ul>
             <div className="store-cart-footer store-cart-footer-column">
               <div className="store-cart-checklist">
-                <p className="store-muted">Checklist checkout demo</p>
+                <p className="store-muted">Estado de compra</p>
                 <p className="store-feedback">
                   {isLoggedIn ? "✅ Sesión iniciada" : "⚠️ Inicia sesión para continuar"}
                 </p>
@@ -264,14 +264,14 @@ export default function CartDrawer() {
                 </div>
               ) : (
                 <button type="button" className="store-button" disabled>
-                  Finalizar compra (habilitación completa en FASE 10.5)
+                  Finalizar compra
                 </button>
               )}
 
               <div>
                 <p className="store-muted">Total</p>
                 <p className="store-cart-total">{formatPrice(totalPrice)}</p>
-                <p className="store-feedback">Checkout demo, sin cobro real.</p>
+                <p className="store-feedback">Pago simulado para esta compra.</p>
               </div>
             </div>
           </div>

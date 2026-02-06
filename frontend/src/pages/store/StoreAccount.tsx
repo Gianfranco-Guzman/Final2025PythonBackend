@@ -157,7 +157,7 @@ export default function StoreAccount() {
     persistCard(nextCard);
     setCard(nextCard);
     setCardForm(emptyCardForm);
-    setCardMessage("Tarjeta guardada localmente para esta demo.");
+    setCardMessage("Tarjeta guardada correctamente.");
     setIsSubmittingCard(false);
   };
 
@@ -249,7 +249,7 @@ export default function StoreAccount() {
         </div>
 
         <div className="store-account-card">
-          <h3>Tarjeta de pago (demo)</h3>
+          <h3>Tarjeta de pago</h3>
           <p className="store-muted">
             {card
               ? `${card.holderName} · ${maskCard(card.cardNumber)} · Vence ${card.expiry}`
