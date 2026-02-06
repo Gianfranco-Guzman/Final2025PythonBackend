@@ -64,7 +64,21 @@ export default function StoreHome() {
   }, [products]);
 
   const catalogProducts = useMemo(() => {
-    return [...products].sort((first, second) => second.id_key - first.id_key).slice(0, 8);
+    const sortedByLatest = [...products].sort((first, second) => second.id_key - first.id_key);
+    const selectedByCategory = new Map<number, ApiProduct[]>();
+
+    sortedByLatest.forEach((product) => {
+      const list = selectedByCategory.get(product.category_id) ?? [];
+      if (list.length < 2) {
+        selectedByCategory.set(product.category_id, [...list, product]);
+      }
+    });
+
+    const mixed = Array.from(selectedByCategory.values()).flat();
+    const mixedIds = new Set(mixed.map((product) => product.id_key));
+    const remaining = sortedByLatest.filter((product) => !mixedIds.has(product.id_key));
+
+    return [...mixed, ...remaining].slice(0, 8);
   }, [products]);
 
   const recommendedProducts = useMemo(() => {
@@ -137,8 +151,8 @@ export default function StoreHome() {
           <section className="store-products store-home-section">
             <div className="store-products-header">
               <div>
-                <h2>Productos para explorar</h2>
-                <p className="store-muted">Selección de 8 productos reales listos para agregar al carrito.</p>
+                <h2>Últimos ingresos</h2>
+                <p className="store-muted">Selección mixta por categorías con novedades para descubrir.</p>
               </div>
             </div>
             <div className="store-products-grid">
