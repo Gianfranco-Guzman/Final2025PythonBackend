@@ -9,7 +9,7 @@ type FetchStatus = "idle" | "loading" | "success" | "error";
 
 type StoreFilters = {
   search: string;
-  categoryId: number | null;
+  categoryIds: number[];
 };
 
 export default function StoreProducts() {
@@ -17,7 +17,7 @@ export default function StoreProducts() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [categoryStatus, setCategoryStatus] = useState<FetchStatus>("idle");
   const [productStatus, setProductStatus] = useState<FetchStatus>("idle");
-  const [filters, setFilters] = useState<StoreFilters>({ search: "", categoryId: null });
+  const [filters, setFilters] = useState<StoreFilters>({ search: "", categoryIds: [] });
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -56,9 +56,12 @@ export default function StoreProducts() {
 
   useEffect(() => {
     const search = searchParams.get("search") ?? "";
-    const categoryParam = searchParams.get("category");
-    const categoryId = categoryParam ? Number(categoryParam) : null;
-    setFilters({ search, categoryId: Number.isNaN(categoryId) ? null : categoryId });
+    const categoryParam = searchParams.get("category") ?? "";
+    const categoryIds = categoryParam
+      .split(",")
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isInteger(value));
+    setFilters({ search, categoryIds: Array.from(new Set(categoryIds)) });
   }, [searchParams]);
 
   const categoryLookup = useMemo(() => {
@@ -69,7 +72,10 @@ export default function StoreProducts() {
     const normalizedSearch = filters.search.trim().toLowerCase();
 
     return products.filter((product) => {
-      if (filters.categoryId !== null && product.category_id !== filters.categoryId) {
+      if (
+        filters.categoryIds.length > 0 &&
+        !filters.categoryIds.includes(product.category_id)
+      ) {
         return false;
       }
 
@@ -79,14 +85,18 @@ export default function StoreProducts() {
 
       return product.name.toLowerCase().includes(normalizedSearch);
     });
-  }, [filters.categoryId, filters.search, products]);
+  }, [filters.categoryIds, filters.search, products]);
 
-  const handleCategoryChange = (categoryId: number | null) => {
+  const handleCategoryToggle = (categoryId: number) => {
     const nextParams = new URLSearchParams(searchParams);
-    if (categoryId === null) {
+    const nextCategories = filters.categoryIds.includes(categoryId)
+      ? filters.categoryIds.filter((id) => id !== categoryId)
+      : [...filters.categoryIds, categoryId];
+
+    if (nextCategories.length === 0) {
       nextParams.delete("category");
     } else {
-      nextParams.set("category", String(categoryId));
+      nextParams.set("category", nextCategories.join(","));
     }
     setSearchParams(nextParams, { replace: true });
   };
@@ -107,15 +117,24 @@ export default function StoreProducts() {
           </p>
         </div>
         <div className="store-products-filters">
-          {categoryStatus === "success" && filters.categoryId !== null ? (
-            <button
-              type="button"
-              className="store-chip store-chip-active"
-              onClick={() => handleCategoryChange(null)}
-            >
-              {categoryLookup.get(filters.categoryId)?.name ?? "Categoría"} ×
-            </button>
-          ) : null}
+          {categoryStatus === "success"
+            ? categories.map((category) => {
+                const isSelected = filters.categoryIds.includes(category.id_key);
+                return (
+                  <label
+                    key={category.id_key}
+                    className={isSelected ? "store-chip store-chip-active" : "store-chip"}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleCategoryToggle(category.id_key)}
+                    />
+                    {category.name}
+                  </label>
+                );
+              })
+            : null}
           {filters.search ? (
             <button
               type="button"
@@ -127,6 +146,11 @@ export default function StoreProducts() {
               }}
             >
               {filters.search} ×
+            </button>
+          ) : null}
+          {filters.categoryIds.length > 0 || filters.search ? (
+            <button type="button" className="store-ghost" onClick={handleClearFilters}>
+              Limpiar filtros
             </button>
           ) : null}
         </div>
