@@ -122,21 +122,6 @@ export default function StoreProducts() {
         <div className="store-products-filters">
           {categoryStatus === "success" ? (
             <>
-              <label
-                className={
-                  filters.categoryIds.length === 0
-                    ? "store-chip store-chip-active"
-                    : "store-chip"
-                }
-              >
-                <input
-                  type="checkbox"
-                  checked={filters.categoryIds.length === 0}
-                  onChange={handleClearFilters}
-                />
-                Todas
-              </label>
-
               {categories.map((category) => {
                 const isSelected = filters.categoryIds.includes(category.id_key);
 
