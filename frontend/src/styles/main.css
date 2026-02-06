@@ -622,6 +622,45 @@ body {
   border: 1px solid rgba(148, 163, 184, 0.15);
 }
 
+.store-home {
+  display: grid;
+  gap: 20px;
+}
+
+.store-home-section {
+  margin-top: 4px;
+}
+
+.store-home-recommendations {
+  margin-top: 4px;
+}
+
+.store-home-recommendations-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.store-home-mini-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.store-home-mini-card h4 {
+  font-size: 15px;
+  color: #f8fafc;
+}
+
+.store-home-mini-card p {
+  margin: 0;
+  color: #cbd5f5;
+  font-size: 13px;
+}
+
 .store-pill {
   display: inline-flex;
   padding: 6px 12px;
