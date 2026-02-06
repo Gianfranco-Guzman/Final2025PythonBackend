@@ -64,17 +64,36 @@ export default function StoreHome() {
   }, [products]);
 
   const catalogProducts = useMemo(() => {
-    return [...products].sort((first, second) => second.id_key - first.id_key).slice(0, 8);
+    const sortedByLatest = [...products].sort((first, second) => second.id_key - first.id_key);
+    const selectedByCategory = new Map<number, ApiProduct[]>();
+
+    sortedByLatest.forEach((product) => {
+      const list = selectedByCategory.get(product.category_id) ?? [];
+      if (list.length < 2) {
+        selectedByCategory.set(product.category_id, [...list, product]);
+      }
+    });
+
+    const mixed = Array.from(selectedByCategory.values()).flat();
+    const mixedIds = new Set(mixed.map((product) => product.id_key));
+    const remaining = sortedByLatest.filter((product) => !mixedIds.has(product.id_key));
+
+    return [...mixed, ...remaining].slice(0, 8);
   }, [products]);
 
   const recommendedProducts = useMemo(() => {
-    const featuredIds = new Set(featuredProducts.map((product) => product.id_key));
+    const byCategory = new Map<number, ApiProduct>();
 
-    return [...products]
-      .filter((product) => !featuredIds.has(product.id_key))
-      .sort((first, second) => second.stock - first.stock)
-      .slice(0, 3);
-  }, [featuredProducts, products]);
+    [...products]
+      .sort((first, second) => first.price - second.price)
+      .forEach((product) => {
+        if (!byCategory.has(product.category_id)) {
+          byCategory.set(product.category_id, product);
+        }
+      });
+
+    return Array.from(byCategory.values()).slice(0, 6);
+  }, [products]);
 
   return (
     <section className="store-home">
@@ -83,14 +102,14 @@ export default function StoreHome() {
           <p className="store-pill">Tecnología para tu setup</p>
           <h2>Bienvenido a TECHSTORE</h2>
           <p className="store-subtitle">
-            Explorá productos reales cargados desde el backend y encontrá ofertas para tu
+            Explorá un catálogo completo de tecnología y encontrá el equipo ideal para tu
             próximo upgrade.
           </p>
         </div>
         <div className="store-highlight">
           <p>
-            Catálogo activo con {products.length} productos. Descubrí novedades, bajo stock y
-            recomendados en una sola vista.
+            Catálogo activo con {products.length} productos para comparar y elegir con una
+            experiencia de compra clara y directa.
           </p>
         </div>
       </article>
@@ -132,8 +151,8 @@ export default function StoreHome() {
           <section className="store-products store-home-section">
             <div className="store-products-header">
               <div>
-                <h2>Productos para explorar</h2>
-                <p className="store-muted">Selección de 8 productos reales listos para agregar al carrito.</p>
+                <h2>Últimos ingresos</h2>
+                <p className="store-muted">Selección mixta por categorías con novedades para descubrir.</p>
               </div>
             </div>
             <div className="store-products-grid">
@@ -154,21 +173,25 @@ export default function StoreHome() {
 
           <section className="store-card store-home-recommendations">
             <div>
-              <p className="store-pill">Novedades / Recomendados</p>
-              <h3>Lo más recomendado por disponibilidad</h3>
+              <p className="store-pill">Recomendados</p>
+              <h3>Selección recomendada</h3>
             </div>
-            <div className="store-home-recommendations-list">
+            <div className="store-products-grid">
               {recommendedProducts.length > 0 ? (
-                recommendedProducts.map((product) => (
-                  <article key={product.id_key} className="store-home-mini-card">
-                    <h4>{product.name}</h4>
-                    <p>
-                      {categoryLookup.get(product.category_id) ?? "Sin categoría"} · Stock: {product.stock}
-                    </p>
-                  </article>
-                ))
+                recommendedProducts.map((product) => {
+                  const categoryName = categoryLookup.get(product.category_id) ?? "Sin categoría";
+
+                  return (
+                    <ProductCard
+                      key={product.id_key}
+                      product={product}
+                      categoryName={categoryName}
+                      imageSrc={resolveCategoryImage(categoryName)}
+                    />
+                  );
+                })
               ) : (
-                <p className="store-muted">Suma más productos para generar recomendaciones automáticas.</p>
+                <p className="store-muted">Aún no hay productos disponibles para recomendar.</p>
               )}
             </div>
           </section>
