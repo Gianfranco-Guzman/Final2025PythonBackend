@@ -1,7 +1,12 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
-import { getStoredCard, getStoredUser, type SavedCard } from "../../store/accountStorage";
+import {
+  getStoredCard,
+  getStoredUser,
+  persistCard,
+  type SavedCard,
+} from "../../store/accountStorage";
 import { useCart } from "../../store/cartStore";
 import { formatPrice } from "../../utils/formatters";
 
@@ -15,6 +20,12 @@ const emptyAddressForm: AddressFormValues = {
   street: "",
   number: "",
   city: "",
+};
+
+const emptyCardForm: SavedCard = {
+  holderName: "",
+  cardNumber: "",
+  expiry: "",
 };
 
 const maskCard = (cardNumber: string) => {
@@ -35,8 +46,12 @@ export default function CartDrawer() {
   const [addressSummary, setAddressSummary] = useState<string | null>(null);
   const [savedCard, setSavedCard] = useState<SavedCard | null>(null);
   const [addressForm, setAddressForm] = useState<AddressFormValues>(emptyAddressForm);
+  const [cardForm, setCardForm] = useState<SavedCard>(emptyCardForm);
   const [addressMessage, setAddressMessage] = useState<string | null>(null);
+  const [cardMessage, setCardMessage] = useState<string | null>(null);
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [isSavingCard, setIsSavingCard] = useState(false);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -125,9 +140,36 @@ export default function CartDrawer() {
     }
   };
 
+  const handleSaveCard = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCardMessage(null);
+
+    if (!cardForm.holderName.trim() || !cardForm.cardNumber.trim() || !cardForm.expiry.trim()) {
+      setCardMessage("Completa titular, número y vencimiento.");
+      return;
+    }
+
+    setIsSavingCard(true);
+    const nextCard = {
+      holderName: cardForm.holderName.trim(),
+      cardNumber: cardForm.cardNumber.trim(),
+      expiry: cardForm.expiry.trim(),
+    };
+    persistCard(nextCard);
+    setSavedCard(nextCard);
+    setCardForm(emptyCardForm);
+    setCardMessage("Tarjeta guardada.");
+    setIsSavingCard(false);
+  };
+
+  const handleCheckout = () => {
+    setCheckoutMessage("Compra realizada (demo). Próxima fase: pantalla de éxito.");
+  };
+
   const isLoggedIn = Boolean(userEmail);
   const hasAddress = Boolean(addressSummary);
   const hasCard = Boolean(savedCard);
+  const canCheckout = isLoggedIn && hasAddress && hasCard && items.length > 0;
 
   return (
     <div className={`store-cart ${isOpen ? "store-cart-open" : ""}`}>
@@ -256,22 +298,54 @@ export default function CartDrawer() {
                   {addressMessage ? <p className="store-feedback">{addressMessage}</p> : null}
                 </form>
               ) : !hasCard ? (
-                <div className="store-card store-empty-state">
-                  <p className="store-muted">Guarda una tarjeta en Mi cuenta para finalizar la compra.</p>
-                  <Link className="store-button" to="/store/account" onClick={closeCart}>
-                    Ir a Mi cuenta
-                  </Link>
-                </div>
-              ) : (
-                <button type="button" className="store-button" disabled>
-                  Finalizar compra
-                </button>
-              )}
+                <form className="store-account-form" onSubmit={handleSaveCard}>
+                  <label>
+                    Titular
+                    <input
+                      type="text"
+                      value={cardForm.holderName}
+                      onChange={(event) =>
+                        setCardForm((prev) => ({ ...prev, holderName: event.target.value }))
+                      }
+                    />
+                  </label>
+                  <label>
+                    Número de tarjeta
+                    <input
+                      type="text"
+                      value={cardForm.cardNumber}
+                      onChange={(event) =>
+                        setCardForm((prev) => ({ ...prev, cardNumber: event.target.value }))
+                      }
+                    />
+                  </label>
+                  <label>
+                    Vencimiento
+                    <input
+                      type="text"
+                      value={cardForm.expiry}
+                      onChange={(event) =>
+                        setCardForm((prev) => ({ ...prev, expiry: event.target.value }))
+                      }
+                      placeholder="MM/AA"
+                    />
+                  </label>
+                  <button type="submit" className="store-button" disabled={isSavingCard}>
+                    {isSavingCard ? "Guardando..." : "Guardar tarjeta"}
+                  </button>
+                  {cardMessage ? <p className="store-feedback">{cardMessage}</p> : null}
+                </form>
+              ) : null}
+
+              <button type="button" className="store-button" onClick={handleCheckout} disabled={!canCheckout}>
+                Finalizar compra
+              </button>
 
               <div>
                 <p className="store-muted">Total</p>
                 <p className="store-cart-total">{formatPrice(totalPrice)}</p>
                 <p className="store-feedback">Pago simulado para esta compra.</p>
+                {checkoutMessage ? <p className="store-feedback">{checkoutMessage}</p> : null}
               </div>
             </div>
           </div>

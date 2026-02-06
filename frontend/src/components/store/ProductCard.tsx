@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ApiProduct } from "../../api/types";
+import { getStoredUser } from "../../store/accountStorage";
 import { useCart } from "../../store/cartStore";
 import { formatPrice } from "../../utils/formatters";
 
@@ -15,9 +16,19 @@ export default function ProductCard({
   imageSrc
 }: ProductCardProps) {
   const { addItem, openCart } = useCart();
+  const navigate = useNavigate();
+  const location = useLocation();
   const isLowStock = product.stock <= 5;
 
   const handleAddToCart = () => {
+    const user = getStoredUser();
+    if (!user) {
+      navigate(`${location.pathname}${location.search}`, {
+        state: { openLogin: true }
+      });
+      return;
+    }
+
     addItem(product, categoryName, imageSrc);
     openCart();
   };
