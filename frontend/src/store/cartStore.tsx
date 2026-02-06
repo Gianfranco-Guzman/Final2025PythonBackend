@@ -32,6 +32,7 @@ type CartContextValue = {
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
+  clearCart: () => void;
 };
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -124,6 +125,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
   const toggleCart = () => setIsOpen((prev) => !prev);
+  const clearCart = () => setItems([]);
 
   const value = useMemo<CartContextValue>(
     () => ({
@@ -137,6 +139,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       openCart,
       closeCart,
       toggleCart,
+      clearCart,
     }),
     [items, isOpen, totalItems, totalPrice]
   );

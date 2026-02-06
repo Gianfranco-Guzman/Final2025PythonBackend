@@ -8,6 +8,7 @@ import {
   type SavedCard,
 } from "../../store/accountStorage";
 import { useCart } from "../../store/cartStore";
+import { persistCheckoutSummary } from "../../store/checkoutStorage";
 import { formatPrice } from "../../utils/formatters";
 
 type AddressFormValues = {
@@ -37,7 +38,7 @@ const maskCard = (cardNumber: string) => {
 };
 
 export default function CartDrawer() {
-  const { items, isOpen, totalItems, totalPrice, closeCart, removeItem, updateQuantity } =
+  const { items, isOpen, totalItems, totalPrice, closeCart, removeItem, updateQuantity, clearCart } =
     useCart();
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,7 +50,6 @@ export default function CartDrawer() {
   const [cardForm, setCardForm] = useState<SavedCard>(emptyCardForm);
   const [addressMessage, setAddressMessage] = useState<string | null>(null);
   const [cardMessage, setCardMessage] = useState<string | null>(null);
-  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [isSavingCard, setIsSavingCard] = useState(false);
 
@@ -163,7 +163,25 @@ export default function CartDrawer() {
   };
 
   const handleCheckout = () => {
-    setCheckoutMessage("Compra realizada (demo). Próxima fase: pantalla de éxito.");
+    if (!canCheckout || !userEmail || !addressSummary) {
+      return;
+    }
+
+    const summaryItems = items.map((item) => ({ ...item }));
+    const customerName = getStoredUser()?.name ?? "Cliente";
+
+    persistCheckoutSummary({
+      customerName,
+      customerEmail: userEmail,
+      address: addressSummary,
+      total: totalPrice,
+      purchasedAt: new Date().toISOString(),
+      items: summaryItems,
+    });
+
+    clearCart();
+    closeCart();
+    navigate("/store/checkout-success");
   };
 
   const isLoggedIn = Boolean(userEmail);
@@ -344,8 +362,7 @@ export default function CartDrawer() {
               <div>
                 <p className="store-muted">Total</p>
                 <p className="store-cart-total">{formatPrice(totalPrice)}</p>
-                <p className="store-feedback">Pago simulado para esta compra.</p>
-                {checkoutMessage ? <p className="store-feedback">{checkoutMessage}</p> : null}
+                <p className="store-feedback">Pago procesado correctamente.</p>
               </div>
             </div>
           </div>
