@@ -389,7 +389,8 @@ body {
 
 .store-subnav-link:hover,
 .store-subnav-trigger:hover,
-.store-subnav-link:focus-visible {
+.store-subnav-link:focus-visible,
+.store-subnav-link[aria-current="page"] {
   color: #7dd3fc;
   border-color: #7dd3fc;
 }
@@ -1332,7 +1333,8 @@ body {
 }
 
 .store-footer-links a:hover,
-.store-footer-links a:focus-visible {
+.store-footer-links a:focus-visible,
+.store-footer-links a[aria-current="page"] {
   color: #7dd3fc;
 }
 
