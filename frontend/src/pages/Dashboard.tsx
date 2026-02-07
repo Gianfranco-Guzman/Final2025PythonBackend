@@ -46,7 +46,7 @@ export default function Dashboard() {
     try {
       const result = await seedAdminDemoData();
       setSeedResult(
-        `Carga lista: +${result.clients} clientes, +${result.addresses} direcciones, +${result.bills} facturas, +${result.orders} órdenes, +${result.orderDetails} detalles, +${result.reviews} reviews.`
+        `Carga lista: +${result.clients} clientes, +${result.addresses} direcciones, +${result.bills} facturas, +${result.orders} órdenes, +${result.orderDetails} detalles, +${result.reviews} reseñas.`
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
@@ -60,15 +60,15 @@ export default function Dashboard() {
       <header className="hero">
         <div>
           <p className="overline">E-commerce API</p>
-          <h1>Panel inicial para consumir la API</h1>
+          <h1>Panel inicial de gestión</h1>
           <p className="subtitle">
-            Administra datos de la tienda y completa contenido real para la demo.
+            Administra los datos de la tienda y mantén el catálogo actualizado.
           </p>
           <div className="seed-actions">
             <button type="button" onClick={handleSeedData} disabled={seeding}>
               {seeding
-                ? "Cargando datos de ejemplo..."
-                : "Cargar datos demo para admin"}
+                ? "Preparando datos iniciales..."
+                : "Cargar datos iniciales"}
             </button>
             {seedResult ? <p className="seed-result">{seedResult}</p> : null}
           </div>

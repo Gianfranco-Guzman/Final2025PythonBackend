@@ -203,7 +203,7 @@ export default function StoreHeader() {
               </NavLink>
               {user.role === "admin" ? (
                 <NavLink className="store-admin-link" to="/dashboard">
-                  Admin
+                  Panel de administración
                 </NavLink>
               ) : null}
               <button type="button" className="store-ghost" onClick={handleLogout}>
@@ -212,7 +212,7 @@ export default function StoreHeader() {
             </div>
           ) : (
             <button type="button" className="store-cart-button" onClick={handleOpenModal}>
-              Ingresar
+              Iniciar sesión
             </button>
           )}
         </div>
@@ -245,7 +245,7 @@ export default function StoreHeader() {
                   setSuccessMessage(null);
                 }}
               >
-                Ingresar
+                Iniciar sesión
               </button>
               <button
                 type="button"
