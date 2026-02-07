@@ -25,7 +25,7 @@ export default function StoreHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialSearch = searchParams.get("search") ?? "";
+  const initialSearch = searchParams.get("q") ?? searchParams.get("search") ?? "";
   const [searchValue, setSearchValue] = useState(initialSearch);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function StoreHeader() {
     const category = searchParams.get("category");
     const nextParams = new URLSearchParams();
     if (value.trim()) {
-      nextParams.set("search", value);
+      nextParams.set("q", value);
     }
     if (category) {
       nextParams.set("category", category);
