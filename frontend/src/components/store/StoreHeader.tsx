@@ -25,7 +25,7 @@ export default function StoreHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialSearch = searchParams.get("search") ?? "";
+  const initialSearch = searchParams.get("q") ?? searchParams.get("search") ?? "";
   const [searchValue, setSearchValue] = useState(initialSearch);
 
   useEffect(() => {
@@ -56,13 +56,18 @@ export default function StoreHeader() {
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
-    const category = searchParams.get("category");
+    const rawCategory = searchParams.get("category") ?? "";
+    const validCategories = rawCategory
+      .split(",")
+      .map((entry) => Number(entry.trim()))
+      .filter((entry) => Number.isInteger(entry) && entry > 0);
+
     const nextParams = new URLSearchParams();
     if (value.trim()) {
-      nextParams.set("search", value);
+      nextParams.set("q", value);
     }
-    if (category) {
-      nextParams.set("category", category);
+    if (validCategories.length > 0) {
+      nextParams.set("category", validCategories.join(","));
     }
     const query = nextParams.toString();
     const target = `/store/products${query ? `?${query}` : ""}`;

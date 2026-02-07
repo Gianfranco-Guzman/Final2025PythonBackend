@@ -8,7 +8,7 @@ import { resolveCategoryImage } from "../../data/storeAssets";
 type FetchStatus = "idle" | "loading" | "success" | "error";
 
 type StoreFilters = {
-  search: string;
+  query: string;
   categoryIds: number[];
 };
 
@@ -17,7 +17,7 @@ export default function StoreProducts() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [categoryStatus, setCategoryStatus] = useState<FetchStatus>("idle");
   const [productStatus, setProductStatus] = useState<FetchStatus>("idle");
-  const [filters, setFilters] = useState<StoreFilters>({ search: "", categoryIds: [] });
+  const [filters, setFilters] = useState<StoreFilters>({ query: "", categoryIds: [] });
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -55,14 +55,14 @@ export default function StoreProducts() {
   }, []);
 
   useEffect(() => {
-    const search = searchParams.get("search") ?? "";
+    const query = searchParams.get("q") ?? searchParams.get("search") ?? "";
     const categoryParam = searchParams.get("category") ?? "";
     const categoryIds = categoryParam
       .split(",")
       .map((value) => Number(value.trim()))
-      .filter((value) => Number.isInteger(value));
+      .filter((value) => Number.isInteger(value) && value > 0);
 
-    setFilters({ search, categoryIds: Array.from(new Set(categoryIds)) });
+    setFilters({ query, categoryIds: Array.from(new Set(categoryIds)) });
   }, [searchParams]);
 
   const categoryLookup = useMemo(() => {
@@ -70,7 +70,7 @@ export default function StoreProducts() {
   }, [categories]);
 
   const filteredProducts = useMemo(() => {
-    const normalizedSearch = filters.search.trim().toLowerCase();
+    const normalizedQuery = filters.query.trim().toLowerCase();
 
     return products.filter((product) => {
       if (
@@ -80,13 +80,18 @@ export default function StoreProducts() {
         return false;
       }
 
-      if (!normalizedSearch) {
+      if (!normalizedQuery) {
         return true;
       }
 
-      return product.name.toLowerCase().includes(normalizedSearch);
+      const categoryName = categoryLookup.get(product.category_id)?.name?.toLowerCase() ?? "";
+
+      return (
+        product.name.toLowerCase().includes(normalizedQuery) ||
+        categoryName.includes(normalizedQuery)
+      );
     });
-  }, [filters.categoryIds, filters.search, products]);
+  }, [categoryLookup, filters.categoryIds, filters.query, products]);
 
   const handleCategoryToggle = (categoryId: number) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -142,21 +147,22 @@ export default function StoreProducts() {
             </>
           ) : null}
 
-          {filters.search ? (
+          {filters.query ? (
             <button
               type="button"
               className="store-chip"
               onClick={() => {
                 const nextParams = new URLSearchParams(searchParams);
+                nextParams.delete("q");
                 nextParams.delete("search");
                 setSearchParams(nextParams, { replace: true });
               }}
             >
-              {filters.search} ×
+              {filters.query} ×
             </button>
           ) : null}
 
-          {filters.categoryIds.length > 0 || filters.search ? (
+          {filters.categoryIds.length > 0 || filters.query ? (
             <button type="button" className="store-ghost" onClick={handleClearFilters}>
               Limpiar filtros
             </button>
