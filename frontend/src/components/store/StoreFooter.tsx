@@ -13,8 +13,8 @@ export default function StoreFooter() {
         <div>
           <p className="store-footer-title">Explorar</p>
           <div className="store-footer-links">
-            <NavLink to="/store">Inicio</NavLink>
-            <NavLink to="/store/products">Productos</NavLink>
+            <NavLink to="/store" end>Inicio</NavLink>
+            <NavLink to="/store/products" end>Catálogo</NavLink>
             <NavLink to="/store/account">Mi cuenta</NavLink>
           </div>
         </div>
