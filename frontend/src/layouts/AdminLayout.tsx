@@ -74,7 +74,7 @@ export default function AdminLayout() {
           </NavLink>
           </nav>
           <button type="button" className="admin-exit" onClick={handleExitAdmin}>
-            Salir del panel
+            Salir de admin
           </button>
         </div>
       </header>

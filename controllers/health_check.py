@@ -51,6 +51,7 @@ def evaluate_health_level(*statuses):
     return "healthy"
 
 
+@router.get("")
 @router.get("/")
 def health_check():
     """
