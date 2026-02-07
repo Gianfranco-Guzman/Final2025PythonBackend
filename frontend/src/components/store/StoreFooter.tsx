@@ -20,13 +20,13 @@ export default function StoreFooter() {
         </div>
         <div>
           <p className="store-footer-title">Contacto</p>
-          <p className="store-footer-text">ventas@techstore.demo</p>
+          <p className="store-footer-text">ventas@techstore.com</p>
           <p className="store-footer-text">+54 11 5555-1234</p>
           <p className="store-footer-text">Lun a Vie · 9:00 - 19:00</p>
         </div>
       </div>
       <div className="store-footer-bottom">
-        <p className="store-footer-text">© 2025 TechStore Demo. Todos los derechos reservados.</p>
+        <p className="store-footer-text">© 2025 TechStore. Todos los derechos reservados.</p>
       </div>
     </footer>
   );
