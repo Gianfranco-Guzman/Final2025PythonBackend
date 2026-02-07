@@ -3,9 +3,40 @@ import { Link } from "react-router-dom";
 import { api } from "../../api/client";
 import { ApiCategory, ApiProduct } from "../../api/types";
 import ProductCard from "../../components/store/ProductCard";
+import { DemoCategoryKey, categoryImageMap } from "../../data/demoCatalog";
 import { resolveCategoryImage } from "../../data/storeAssets";
 
 type FetchStatus = "idle" | "loading" | "success" | "error";
+
+const carouselCategoryOrder: DemoCategoryKey[] = [
+  "auricular",
+  "mouse",
+  "teclado",
+  "placa de video",
+  "procesador"
+];
+
+const resolveCategoryKey = (categoryName: string): DemoCategoryKey | null => {
+  const normalized = categoryName.trim().toLowerCase();
+
+  if (normalized.includes("placa")) {
+    return "placa de video";
+  }
+  if (normalized.includes("proces")) {
+    return "procesador";
+  }
+  if (normalized.includes("auricular") || normalized.includes("head")) {
+    return "auricular";
+  }
+  if (normalized.includes("mouse")) {
+    return "mouse";
+  }
+  if (normalized.includes("tecl")) {
+    return "teclado";
+  }
+
+  return null;
+};
 
 export default function StoreHome() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
@@ -50,6 +81,17 @@ export default function StoreHome() {
     return new Map(categories.map((category) => [category.id_key, category.name]));
   }, [categories]);
 
+  const categoryKeyById = useMemo(() => {
+    return new Map(
+      categories
+        .map((category) => {
+          const key = resolveCategoryKey(category.name);
+          return key ? ([category.id_key, key] as const) : null;
+        })
+        .filter((entry): entry is readonly [number, DemoCategoryKey] => entry !== null)
+    );
+  }, [categories]);
+
   const featuredCategories = useMemo(() => {
     return [...categories].sort((first, second) => first.id_key - second.id_key).slice(0, 5);
   }, [categories]);
@@ -59,8 +101,35 @@ export default function StoreHome() {
   }, [products]);
 
   const carouselProducts = useMemo(() => {
-    return featuredProducts.slice(0, 5);
-  }, [featuredProducts]);
+    const sortedProducts = [...products].sort((first, second) => second.id_key - first.id_key);
+    const selected: ApiProduct[] = [];
+    const selectedIds = new Set<number>();
+
+    carouselCategoryOrder.forEach((categoryKey) => {
+      const match = sortedProducts.find(
+        (product) =>
+          !selectedIds.has(product.id_key) && categoryKeyById.get(product.category_id) === categoryKey
+      );
+
+      if (!match) {
+        return;
+      }
+
+      selected.push(match);
+      selectedIds.add(match.id_key);
+    });
+
+    sortedProducts.forEach((product) => {
+      if (selected.length >= carouselCategoryOrder.length || selectedIds.has(product.id_key)) {
+        return;
+      }
+
+      selected.push(product);
+      selectedIds.add(product.id_key);
+    });
+
+    return selected;
+  }, [products, categoryKeyById]);
 
   useEffect(() => {
     if (carouselProducts.length === 0) {
@@ -111,6 +180,10 @@ export default function StoreHome() {
               >
                 {carouselProducts.map((product) => {
                   const categoryName = categoryLookup.get(product.category_id) ?? "Sin categoría";
+                  const categoryKey = resolveCategoryKey(categoryName);
+                  const imageSrc = categoryKey
+                    ? categoryImageMap[categoryKey]
+                    : categoryImageMap["placa de video"];
 
                   return (
                     <Link
@@ -118,15 +191,13 @@ export default function StoreHome() {
                       className="store-hero-slide"
                       to={`/store/products/${product.id_key}`}
                     >
-                      <img
-                        src={resolveCategoryImage(categoryName)}
-                        alt={product.name}
-                        loading="lazy"
-                      />
+                      <img src={imageSrc} alt={product.name} loading="lazy" />
                       <div className="store-hero-slide-overlay">
-                        <p className="store-pill">{categoryName}</p>
-                        <h2>{product.name}</h2>
-                        <p className="store-subtitle">Ver detalle del producto</p>
+                        <span className="store-hero-category-badge">{categoryName}</span>
+                        <div className="store-hero-slide-copy">
+                          <h2>{product.name}</h2>
+                          <p className="store-subtitle">Ver detalle del producto</p>
+                        </div>
                       </div>
                     </Link>
                   );
