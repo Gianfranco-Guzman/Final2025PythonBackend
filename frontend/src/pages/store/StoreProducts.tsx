@@ -60,7 +60,7 @@ export default function StoreProducts() {
     const categoryIds = categoryParam
       .split(",")
       .map((value) => Number(value.trim()))
-      .filter((value) => Number.isInteger(value));
+      .filter((value) => Number.isInteger(value) && value > 0);
 
     setFilters({ query, categoryIds: Array.from(new Set(categoryIds)) });
   }, [searchParams]);
