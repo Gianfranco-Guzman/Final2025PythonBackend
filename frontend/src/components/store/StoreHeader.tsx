@@ -195,7 +195,8 @@ export default function StoreHeader() {
         </label>
         <div className="store-auth">
           <button type="button" className="store-cart-button" onClick={toggleCart}>
-            🛒 Carrito
+            <span className="store-cart-icon" aria-hidden="true">🛒</span>
+            <span>Carrito</span>
             {totalItems > 0 ? (
               <span className="store-cart-count">{totalItems}</span>
             ) : null}

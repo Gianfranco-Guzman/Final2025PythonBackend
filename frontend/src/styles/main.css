@@ -484,26 +484,44 @@ body {
 .store-auth {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   justify-content: flex-end;
+}
+
+.store-cart-button,
+.store-ghost,
+.store-button {
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
 .store-cart-button {
   border: 1px solid rgba(148, 163, 184, 0.4);
   background: rgba(15, 23, 42, 0.8);
   color: #e2e8f0;
-  border-radius: 999px;
-  padding: 8px 16px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
   cursor: pointer;
 }
 
-.store-cart-button:hover {
+.store-cart-button:hover,
+.store-cart-button:focus-visible,
+.store-ghost:hover,
+.store-ghost:focus-visible {
   border-color: #7dd3fc;
   color: #7dd3fc;
+}
+
+.store-cart-icon {
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
 }
 
 .store-cart-count {
@@ -527,16 +545,14 @@ body {
 }
 
 .store-button {
-  border: none;
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-weight: 600;
+  border: 1px solid transparent;
   cursor: pointer;
   background: #38bdf8;
   color: #0f172a;
 }
 
-.store-button:hover {
+.store-button:hover,
+.store-button:focus-visible {
   background: #7dd3fc;
 }
 
@@ -632,13 +648,8 @@ body {
   border: 1px solid rgba(148, 163, 184, 0.4);
   background: transparent;
   color: #e2e8f0;
-  padding: 8px 16px;
-  border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .store-hero {
