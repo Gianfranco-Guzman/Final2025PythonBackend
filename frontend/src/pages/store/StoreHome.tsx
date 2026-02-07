@@ -11,6 +11,7 @@ export default function StoreHome() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [status, setStatus] = useState<FetchStatus>("idle");
+  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -57,25 +58,40 @@ export default function StoreHome() {
     return [...products].sort((first, second) => second.id_key - first.id_key).slice(0, 8);
   }, [products]);
 
+  const carouselProducts = useMemo(() => {
+    return featuredProducts.slice(0, 5);
+  }, [featuredProducts]);
+
+  useEffect(() => {
+    if (carouselProducts.length === 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % carouselProducts.length);
+    }, 4500);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [carouselProducts]);
+
+  useEffect(() => {
+    if (activeSlide >= carouselProducts.length) {
+      setActiveSlide(0);
+    }
+  }, [activeSlide, carouselProducts]);
+
+  const handlePrevSlide = () => {
+    setActiveSlide((current) => (current === 0 ? carouselProducts.length - 1 : current - 1));
+  };
+
+  const handleNextSlide = () => {
+    setActiveSlide((current) => (current + 1) % carouselProducts.length);
+  };
+
   return (
     <section className="store-home">
-      <article className="store-hero">
-        <div>
-          <p className="store-pill">Tecnología para tu día a día</p>
-          <h2>Todo tu setup en un solo lugar</h2>
-          <p className="store-subtitle">
-            Descubrí productos de informática, gaming y accesorios con entrega rápida y
-            compra 100% online.
-          </p>
-          <Link className="store-button" to="/store/products">
-            Ver catálogo
-          </Link>
-        </div>
-        <div className="store-highlight">
-          <p>Más de {products.length} productos listos para comparar y sumar a tu carrito.</p>
-        </div>
-      </article>
-
       {status === "loading" ? <p className="store-muted">Cargando contenido de la tienda...</p> : null}
 
       {status === "error" ? (
@@ -87,6 +103,74 @@ export default function StoreHome() {
 
       {status === "success" ? (
         <>
+          {carouselProducts.length > 0 ? (
+            <section className="store-hero-carousel" aria-label="Productos destacados en carrusel">
+              <div
+                className="store-hero-carousel-track"
+                style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+              >
+                {carouselProducts.map((product) => {
+                  const categoryName = categoryLookup.get(product.category_id) ?? "Sin categoría";
+
+                  return (
+                    <Link
+                      key={product.id_key}
+                      className="store-hero-slide"
+                      to={`/store/products/${product.id_key}`}
+                    >
+                      <img
+                        src={resolveCategoryImage(categoryName)}
+                        alt={product.name}
+                        loading="lazy"
+                      />
+                      <div className="store-hero-slide-overlay">
+                        <p className="store-pill">{categoryName}</p>
+                        <h2>{product.name}</h2>
+                        <p className="store-subtitle">Ver detalle del producto</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {carouselProducts.length > 1 ? (
+                <>
+                  <button
+                    type="button"
+                    className="store-carousel-control store-carousel-control-prev"
+                    onClick={handlePrevSlide}
+                    aria-label="Slide anterior"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="store-carousel-control store-carousel-control-next"
+                    onClick={handleNextSlide}
+                    aria-label="Siguiente slide"
+                  >
+                    ›
+                  </button>
+                  <div className="store-carousel-dots" role="tablist" aria-label="Seleccionar slide">
+                    {carouselProducts.map((product, index) => (
+                      <button
+                        key={product.id_key}
+                        type="button"
+                        className={
+                          index === activeSlide
+                            ? "store-carousel-dot store-carousel-dot-active"
+                            : "store-carousel-dot"
+                        }
+                        onClick={() => setActiveSlide(index)}
+                        aria-label={`Ir al slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : null}
+            </section>
+          ) : null}
+
           <section className="store-card store-home-categories">
             <div className="store-products-header">
               <div>
