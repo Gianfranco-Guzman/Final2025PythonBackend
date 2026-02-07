@@ -20,6 +20,17 @@ export default function StoreProducts() {
   const [filters, setFilters] = useState<StoreFilters>({ query: "", categoryIds: [] });
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const parseCategoryIds = (rawCategory: string) => {
+    return Array.from(
+      new Set(
+        rawCategory
+          .split(",")
+          .map((value) => Number(value.trim()))
+          .filter((value) => Number.isInteger(value) && value > 0)
+      )
+    );
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -56,13 +67,22 @@ export default function StoreProducts() {
 
   useEffect(() => {
     const query = searchParams.get("q") ?? searchParams.get("search") ?? "";
-    const categoryParam = searchParams.get("category") ?? "";
-    const categoryIds = categoryParam
-      .split(",")
-      .map((value) => Number(value.trim()))
-      .filter((value) => Number.isInteger(value) && value > 0);
+    const rawCategoryParam = searchParams.get("category") ?? "";
+    const categoryIds = parseCategoryIds(rawCategoryParam);
+    const normalizedCategory = categoryIds.join(",");
 
-    setFilters({ query, categoryIds: Array.from(new Set(categoryIds)) });
+    if (rawCategoryParam && normalizedCategory !== rawCategoryParam) {
+      const nextParams = new URLSearchParams(searchParams);
+      if (normalizedCategory) {
+        nextParams.set("category", normalizedCategory);
+      } else {
+        nextParams.delete("category");
+      }
+      setSearchParams(nextParams, { replace: true });
+      return;
+    }
+
+    setFilters({ query, categoryIds });
   }, [searchParams]);
 
   const categoryLookup = useMemo(() => {
