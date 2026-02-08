@@ -23,20 +23,27 @@ logger = logging.getLogger(__name__)
 env_path = os.path.join(os.path.dirname(__file__), '../.env')
 load_dotenv(env_path)
 
+def _env(name: str, default: str) -> str:
+    value = os.getenv(name)
+    if value is None or value.strip() == '':
+        return default
+    return value
+
+
 # Database configuration with defaults
-POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
-POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
-POSTGRES_DB = os.getenv('POSTGRES_DB', 'postgres')
-POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
-POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'postgres')
+POSTGRES_HOST = _env('POSTGRES_HOST', 'localhost')
+POSTGRES_PORT = _env('POSTGRES_PORT', '5432')
+POSTGRES_DB = _env('POSTGRES_DB', 'postgres')
+POSTGRES_USER = _env('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD = _env('POSTGRES_PASSWORD', 'postgres')
 
 # High-performance connection pool configuration
 # For 400 concurrent requests with 4 workers: 400/4 = 100 connections per worker
 # Pool size + max_overflow should handle peak load
-POOL_SIZE = int(os.getenv('DB_POOL_SIZE', '50'))  # Base pool size per worker
-MAX_OVERFLOW = int(os.getenv('DB_MAX_OVERFLOW', '100'))  # Additional connections during peak
-POOL_TIMEOUT = int(os.getenv('DB_POOL_TIMEOUT', '10'))  # Wait time for connection (reduced for production)
-POOL_RECYCLE = int(os.getenv('DB_POOL_RECYCLE', '3600'))  # Recycle connections after 1 hour
+POOL_SIZE = int(_env('DB_POOL_SIZE', '50'))  # Base pool size per worker
+MAX_OVERFLOW = int(_env('DB_MAX_OVERFLOW', '100'))  # Additional connections during peak
+POOL_TIMEOUT = int(_env('DB_POOL_TIMEOUT', '10'))  # Wait time for connection (reduced for production)
+POOL_RECYCLE = int(_env('DB_POOL_RECYCLE', '3600'))  # Recycle connections after 1 hour
 
 DATABASE_URI = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
 
