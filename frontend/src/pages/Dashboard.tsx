@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { ApiCategory, ApiHealthCheck, ApiProduct } from "../api/types";
+import { seedAdminDemoData } from "../store/adminDemoSeed";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("es-AR", {
@@ -15,6 +16,8 @@ export default function Dashboard() {
   const [categories, setCategories] = useState<ApiCategory[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [seedResult, setSeedResult] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState<boolean>(false);
 
   useEffect(() => {
     const load = async () => {
@@ -36,16 +39,39 @@ export default function Dashboard() {
     load();
   }, []);
 
+  const handleSeedData = async () => {
+    setSeeding(true);
+    setError(null);
+    setSeedResult(null);
+    try {
+      const result = await seedAdminDemoData();
+      setSeedResult(
+        `Carga lista: +${result.clients} clientes, +${result.addresses} direcciones, +${result.bills} facturas, +${result.orders} órdenes, +${result.orderDetails} detalles, +${result.reviews} reseñas.`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <div className="dashboard">
       <header className="hero">
         <div>
           <p className="overline">E-commerce API</p>
-          <h1>Panel inicial para consumir la API</h1>
+          <h1>Panel inicial de gestión</h1>
           <p className="subtitle">
-            Este dashboard valida la conexión con el backend, lista categorías y
-            productos usando los endpoints existentes.
+            Administra los datos de la tienda y mantén el catálogo actualizado.
           </p>
+          <div className="seed-actions">
+            <button type="button" onClick={handleSeedData} disabled={seeding}>
+              {seeding
+                ? "Preparando datos iniciales..."
+                : "Cargar datos iniciales"}
+            </button>
+            {seedResult ? <p className="seed-result">{seedResult}</p> : null}
+          </div>
         </div>
         <div className="status">
           <span>Estado API</span>
