@@ -5,6 +5,7 @@ from typing import Generator
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import sessionmaker, Session
 
 from models.address import AddressModel  # noqa
@@ -68,21 +69,32 @@ MAX_OVERFLOW = _env_int('DB_MAX_OVERFLOW', 100)  # Additional connections during
 POOL_TIMEOUT = _env_int('DB_POOL_TIMEOUT', 10)  # Wait time for connection (reduced for production)
 POOL_RECYCLE = _env_int('DB_POOL_RECYCLE', 3600)  # Recycle connections after 1 hour
 
+fallback_database_url = URL.create(
+    drivername='postgresql',
+    username=POSTGRES_USER,
+    password=POSTGRES_PASSWORD,
+    host=POSTGRES_HOST,
+    port=POSTGRES_PORT,
+    database=POSTGRES_DB,
+)
+
 if DATABASE_URL:
-    DATABASE_URI = DATABASE_URL
+    try:
+        database_url = make_url(DATABASE_URL)
+    except Exception:
+        logger.warning(
+            "Invalid DATABASE_URL value. Falling back to POSTGRES_* variables.",
+            exc_info=True,
+        )
+        database_url = fallback_database_url
 else:
-    DATABASE_URI = URL.create(
-        drivername='postgresql',
-        username=POSTGRES_USER,
-        password=POSTGRES_PASSWORD,
-        host=POSTGRES_HOST,
-        port=POSTGRES_PORT,
-        database=POSTGRES_DB,
-    ).render_as_string(hide_password=False)
+    database_url = fallback_database_url
+
+DATABASE_URI = database_url.render_as_string(hide_password=False)
 
 # Create engine with optimized connection pooling for high concurrency
 engine = create_engine(
-    DATABASE_URI,
+    database_url,
     pool_pre_ping=True,  # Verify connections before using (prevents stale connections)
     pool_size=POOL_SIZE,  # Minimum number of connections in pool
     max_overflow=MAX_OVERFLOW,  # Additional connections beyond pool_size
