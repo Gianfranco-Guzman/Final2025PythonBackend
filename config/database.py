@@ -4,6 +4,7 @@ from typing import Generator
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker, Session
 
 from models.address import AddressModel  # noqa
@@ -23,22 +24,61 @@ logger = logging.getLogger(__name__)
 env_path = os.path.join(os.path.dirname(__file__), '../.env')
 load_dotenv(env_path)
 
+def _sanitize_env_value(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    sanitized = value.strip().strip("'\"")
+    if sanitized == '':
+        return None
+
+    return sanitized
+
+
+def _env(name: str, default: str) -> str:
+    sanitized = _sanitize_env_value(os.getenv(name))
+    return default if sanitized is None else sanitized
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = _sanitize_env_value(os.getenv(name))
+    if raw is None:
+        return default
+
+    try:
+        return int(raw)
+    except ValueError:
+        logger.warning("Invalid %s=%r. Falling back to default %s.", name, raw, default)
+        return default
+
+
 # Database configuration with defaults
-POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
-POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
-POSTGRES_DB = os.getenv('POSTGRES_DB', 'postgres')
-POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
-POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'postgres')
+DATABASE_URL = _env('DATABASE_URL', '')
+POSTGRES_HOST = _env('POSTGRES_HOST', 'localhost')
+POSTGRES_PORT = _env_int('POSTGRES_PORT', 5432)
+POSTGRES_DB = _env('POSTGRES_DB', 'postgres')
+POSTGRES_USER = _env('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD = _env('POSTGRES_PASSWORD', 'postgres')
 
 # High-performance connection pool configuration
 # For 400 concurrent requests with 4 workers: 400/4 = 100 connections per worker
 # Pool size + max_overflow should handle peak load
-POOL_SIZE = int(os.getenv('DB_POOL_SIZE', '50'))  # Base pool size per worker
-MAX_OVERFLOW = int(os.getenv('DB_MAX_OVERFLOW', '100'))  # Additional connections during peak
-POOL_TIMEOUT = int(os.getenv('DB_POOL_TIMEOUT', '10'))  # Wait time for connection (reduced for production)
-POOL_RECYCLE = int(os.getenv('DB_POOL_RECYCLE', '3600'))  # Recycle connections after 1 hour
+POOL_SIZE = _env_int('DB_POOL_SIZE', 50)  # Base pool size per worker
+MAX_OVERFLOW = _env_int('DB_MAX_OVERFLOW', 100)  # Additional connections during peak
+POOL_TIMEOUT = _env_int('DB_POOL_TIMEOUT', 10)  # Wait time for connection (reduced for production)
+POOL_RECYCLE = _env_int('DB_POOL_RECYCLE', 3600)  # Recycle connections after 1 hour
 
-DATABASE_URI = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
+if DATABASE_URL:
+    DATABASE_URI = DATABASE_URL
+else:
+    DATABASE_URI = URL.create(
+        drivername='postgresql',
+        username=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
+        host=POSTGRES_HOST,
+        port=POSTGRES_PORT,
+        database=POSTGRES_DB,
+    ).render_as_string(hide_password=False)
 
 # Create engine with optimized connection pooling for high concurrency
 engine = create_engine(

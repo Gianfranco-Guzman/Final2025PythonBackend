@@ -39,6 +39,13 @@ body {
   flex-wrap: wrap;
 }
 
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .nav a {
   text-decoration: none;
   color: #0f172a;
@@ -52,6 +59,20 @@ body {
 .nav a.active {
   background: #0ea5e9;
   color: white;
+}
+
+.admin-exit {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: #0f172a;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-exit:hover {
+  background: #1e293b;
 }
 
 .app-content {
@@ -329,6 +350,39 @@ body {
 }
 
 .store-nav a.active {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.store-category-nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.store-category-nav button,
+.store-category-button {
+  border: none;
+  text-decoration: none;
+  color: #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.store-category-nav button:hover,
+.store-category-nav button:focus-visible,
+.store-category-button:hover,
+.store-category-button:focus-visible {
+  background: #7dd3fc;
+  color: #0f172a;
+}
+
+.store-category-nav button.active,
+.store-category-button.active {
   background: #38bdf8;
   color: #0f172a;
 }
